@@ -75,6 +75,13 @@ void lexing(char *entry, list* token_list, char end)
         break;
 
     token *new = read_word(p, TRUE);
+    token_list_push
+
+    while (*p != end)
+    {
+        read_word(p, FALSE);
+    }
+    
 
     
 
