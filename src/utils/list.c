@@ -25,23 +25,27 @@ size_t list_len(list *list)
     return acc+1;
 }
 
-void list_push_end(list *list, list_elm *elm)
+void list_push_end(list *list, token *t)
 {
+    list_elm *elm = xmalloc(sizeof(list_elm));
+    elm->token = t;
     if (list->head == NULL)
         list->head = elm;
     list->tail->next = elm;
     list->tail = elm;
 }
 
-void list_push_front(list *list, list_elm *elm)
+void list_push_front(list *list, token *t)
 {
+    list_elm *elm = xmalloc(sizeof(list_elm));
+    elm->token = t;
     if (list->head == NULL)
         list->tail = elm;
     elm->next = list->head;
     list->head = elm;
 }
 
-list_elm *list_pop_front(list *list)
+token *list_pop_front(list *list)
 {
     list_elm *toPop = list->head;
     if(toPop != NULL)
@@ -51,10 +55,12 @@ list_elm *list_pop_front(list *list)
             list->tail = NULL;
     }
     toPop->next = NULL;
-    return toPop;
+    token *t = toPop->token;
+    free(toPop);
+    return t;
 }
 
-list *list_find(list *list, token *token)
+token *list_find(list *list, token *token)
 {
     list_elm *p = list->head;
     while(p != NULL)

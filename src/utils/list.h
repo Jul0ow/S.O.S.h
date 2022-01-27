@@ -29,31 +29,22 @@ size_t list_len(list *list);
 // Insert 'elm' in front of the list, that is just after the sentinel.
 // Note that 'elm' is already an existing element.
 // You just have to insert it.
-void list_push_front(list *list, list_elm *elm);
+void list_push_front(list *list, token *t);
 
-void list_push_end(list *list, list_elm *elm);
+void list_push_end(list *list, token *t);
 
 // Extract the first element (not the sentinel) of the list.
 // This operation removes the element from the list and returns it
 // (the caller is responsible for freeing it).
 // If the list is empty, the function returns NULL.
-list_elm *list_pop_front(list *list);
+token *list_pop_front(list *list);
 
 // Search for the first element that contains 'value' and return it
 // (without removing it from the list).
 // The function returns NULL if the value is not in the list.
-list_elm *list_find(list *list, token *token);
-
-// Insert 'elm' in the sorted list (keeping the list sorted).
-// Note that 'elm' is already an existing element.
-// You just have to insert it.
-void list_insert(list *list, list *elm);
+token *list_find(list *list, token *token);
 
 // Reverse the elements of the list (except for the sentinel).
 void list_rev(list *list);
-
-// Split the list in half and put the second half in 'second'.
-// 'second' is an empty list (just a sentinel).
-void list_half_split(list *list, list *second);
 
 #endif
