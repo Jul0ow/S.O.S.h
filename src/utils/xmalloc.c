@@ -18,3 +18,11 @@ void * xcalloc(size_t num, size_t bytePerType)
         err(errno,"Error in allocating memory");
     return res;
 }
+
+void * xrealloc(void * pointer, size_t mem)
+{
+    pointer = realloc(pointer, mem);
+    if(pointer == NULL)
+        err(errno, "Error in allocating memory");
+    res;
+}
