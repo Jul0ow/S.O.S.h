@@ -3,9 +3,14 @@
 char* set_fore_color()
 {
     const char *str = "S.O.Sh@S.O.Sh-Project-S4";
-    const char *format = "<b><span foreground='#FF00DC'>%s</span><span foreground='#C7BF00'>$  </span> </b>";
+    const char *format = "<b><span foreground='#FF00DC'>%s</span><span foreground='white'>:</span><span foreground='#C7BF00'>%s</span><span foreground='white'>$   </span></b>";
     char *markup;
-    markup = g_markup_printf_escaped(format, str);
+    char *s = malloc(SIZE * sizeof(char));
+    while (getcwd(s, SIZE) == NULL)
+	if (realloc(s, SIZE + SIZE) == NULL) errx(1, "realloc");
+
+    markup = g_markup_printf_escaped(format, str, s);
+    free(s);
     return markup;
 }
 
@@ -52,6 +57,12 @@ void add_line(UI *ui, int is_label, char *text)
 
         gtk_grid_attach(GTK_GRID(sub_grid), lab, 0, 0, 1, 1);
         gtk_grid_attach(GTK_GRID(sub_grid), tv, 1, 0, 1, 1);
+        
+	
+	GtkWidget *completion = gtk_label_new("");
+	gtk_widget_set_name(completion, "completion");
+        gtk_grid_attach(GTK_GRID(sub_grid), completion, 2, 0, 1, 1);
+        ui->completion = GTK_LABEL(completion);	
 
         gtk_grid_attach(ui->grid, sub_grid, 0, ui->nb_row, 1, 1);
     }
@@ -93,8 +104,8 @@ void execute_command(UI *ui, char* text)
 	    errx(1, "Dup fails");
         close(p[1]);
         close(p[0]);
-        char *const args[] = {"cat", "cat.c", NULL};
-        execv("cat", args);
+        char *const args[] = {"ls", NULL};
+        execv("ls", args);
     }
     else
     {
@@ -129,7 +140,7 @@ void execute_command(UI *ui, char* text)
     }
 }
 
-void get_string(UI *ui)
+char* get_string(UI *ui)
 {
     ui->buffer = gtk_text_view_get_buffer(ui->text_view);
     GtkTextIter start = {0,};
@@ -138,11 +149,17 @@ void get_string(UI *ui)
     gtk_text_buffer_get_start_iter(ui->buffer, &start);
     gtk_text_buffer_get_end_iter(ui->buffer, &end);
     text = gtk_text_buffer_get_text(ui->buffer, &start, &end, FALSE);
-    
+    return text;
+}
+
+void evaluate_string(UI *ui)
+{
     //TODO Lexeur + Parseur + Eval
     //==============Eval===============    
     //printf("%s\n", text);
     //==============Eval===============
+
+    char *text = get_string(ui);
    
     if (text[0] != '\0') 
         execute_command(ui, text);
@@ -175,9 +192,19 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 
     if (event->keyval == GDK_KEY_Return)
     {
-	get_string(ui);
+	evaluate_string(ui);
 	return TRUE;
     }
+    else if (event->keyval == GDK_KEY_Tab)
+    {
+	printf("ok\n");
+    }
+    else
+    {
+	gtk_label_set_text(ui->completion, "eh merde");
+        //printf("%c", (char)event->keyval);
+    }
+
     return FALSE;
 }
 
@@ -239,6 +266,7 @@ int main(void)
 	.nb_row = 1,
 	.text_view = NULL,
 	.buffer = buffer,
+	.completion = NULL,
 	//.b1 = b1,
     };
 

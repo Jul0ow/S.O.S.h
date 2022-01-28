@@ -19,6 +19,7 @@ typedef struct UserInterface
     size_t nb_row;
     GtkTextView *text_view;
     GtkTextBuffer *buffer;
+    GtkLabel *completion;
     //GtkButton *b1;
 }UI;
 

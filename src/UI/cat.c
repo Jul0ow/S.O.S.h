@@ -34,11 +34,16 @@ void my_cat(char filename[])
 
 int main(int argc, char **argv)
 {
+    argc = argc;
+    argv = argv;
+    /*
     int i;
     for (i = 0; i < argc - 1; i++)
     {
         my_cat(argv[i + 1]);
-    }
+    }*/
+    
+    sleep(3);
 
     return 0;
 }
