@@ -4,8 +4,8 @@
 
 typedef struct
 {
-    struct list *head;
-    struct list *tail;
+    struct list_elm *head;
+    struct list_elm *tail;
 }list;
 
 typedef struct 
