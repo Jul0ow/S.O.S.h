@@ -14,7 +14,7 @@ typedef struct UserInterface
     GtkButton *b1;
 }UI;
 
-//=========================================================================
+//========================================================================
 void my_print(UI *ui, const char* s, int len)
 {
     gtk_text_buffer_set_text(ui->buffer, s, len);
