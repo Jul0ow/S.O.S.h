@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "prefix_graph.h"
+
 #define SIZE 264
 
 typedef struct UserInterface
@@ -20,6 +22,7 @@ typedef struct UserInterface
     GtkTextView *text_view;
     GtkTextBuffer *buffer;
     GtkLabel *completion;
+    Pgraph *G;
     //GtkButton *b1;
 }UI;
 

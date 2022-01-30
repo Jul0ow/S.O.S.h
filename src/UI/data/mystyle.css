@@ -6,3 +6,8 @@
     color: white;
     background-color: #000033;
 }
+
+#completion {
+    color: white;
+    opacity: 0.5;
+}

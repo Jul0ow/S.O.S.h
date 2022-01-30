@@ -1,14 +1,19 @@
 #include "user_interface.h"
 
+char* get_dir()
+{
+    char *s = malloc(SIZE * sizeof(char));
+    while (getcwd(s, SIZE) == NULL)
+        if (realloc(s, SIZE + SIZE) == NULL) errx(1, "realloc");
+    return s;
+}
+
 char* set_fore_color()
 {
     const char *str = "S.O.Sh@S.O.Sh-Project-S4";
     const char *format = "<b><span foreground='#FF00DC'>%s</span><span foreground='white'>:</span><span foreground='#C7BF00'>%s</span><span foreground='white'>$   </span></b>";
     char *markup;
-    char *s = malloc(SIZE * sizeof(char));
-    while (getcwd(s, SIZE) == NULL)
-	if (realloc(s, SIZE + SIZE) == NULL) errx(1, "realloc");
-
+    char* s = get_dir();
     markup = g_markup_printf_escaped(format, str, s);
     free(s);
     return markup;
@@ -104,8 +109,8 @@ void execute_command(UI *ui, char* text)
 	    errx(1, "Dup fails");
         close(p[1]);
         close(p[0]);
-        char *const args[] = {"ls", NULL};
-        execv("ls", args);
+        char *const args[] = {"command/ls", NULL};
+        execv("command/ls", args);
     }
     else
     {
@@ -197,11 +202,31 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
     }
     else if (event->keyval == GDK_KEY_Tab)
     {
-	printf("ok\n");
+	ui->buffer = gtk_text_view_get_buffer(ui->text_view);
+        GtkTextIter start = {0,};
+        GtkTextIter end = {0,};
+    	char *text = malloc((ui->G->longest + 2) * sizeof(char));
+    	gtk_text_buffer_get_start_iter(ui->buffer, &start);
+    	gtk_text_buffer_get_end_iter(ui->buffer, &end);
+    	text = gtk_text_buffer_get_text(ui->buffer, &start, &end, FALSE);
+	const char *s = gtk_label_get_text(ui->completion);
+	strcat(text, s);
+	gtk_text_buffer_set_text(ui->buffer, text, strlen(text));
+        gtk_text_view_set_buffer(ui->text_view, ui->buffer);
+        free(text);
+    }
+    else if (event->keyval == GDK_KEY_BackSpace)
+    {
+	printf("lol\n");
+        char *w = get_word(ui->G, '\0');
+        gtk_label_set_text(ui->completion, w);
+        free(w);
     }
     else
     {
-	gtk_label_set_text(ui->completion, "eh merde");
+	char *w = get_word(ui->G, (char)event->keyval);
+	gtk_label_set_text(ui->completion, w);
+	free(w);
         //printf("%c", (char)event->keyval);
     }
 
@@ -221,7 +246,7 @@ void myCSS(void)
 		    GTK_STYLE_PROVIDER (provider), 
 		    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-    const gchar *myCssFile = "mystyle.css";
+    const gchar *myCssFile = "data/mystyle.css";
     GError *error = 0;
 
     gtk_css_provider_load_from_file(provider, 
@@ -244,7 +269,7 @@ int main(void)
 
     GtkBuilder* builder = gtk_builder_new();
     GError* error = NULL;
-    if (gtk_builder_add_from_file(builder, "test_interface.glade", &error) == 0)
+    if (gtk_builder_add_from_file(builder, "data/interface.glade", &error) == 0)
     {
         g_printerr("Error loading file: %s\n", error->message);
         g_clear_error(&error);
@@ -259,6 +284,8 @@ int main(void)
     GtkWidget *grid;
     createGrid(&grid, &scroll, "myGrid");
 
+
+
     UI ui =
     {
 	.window = window,
@@ -267,8 +294,13 @@ int main(void)
 	.text_view = NULL,
 	.buffer = buffer,
 	.completion = NULL,
+	.G = NULL,
 	//.b1 = b1,
     };
+
+    char* s = get_dir(&ui);
+    ui.G = create_Pgraph_with_dir(s);
+    free(s);
 
     add_line(&ui, 0, "");
 
@@ -282,4 +314,3 @@ int main(void)
 
     return 0;
 }
-
