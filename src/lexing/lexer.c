@@ -135,6 +135,8 @@ token* read_separator(char *p, list *token_list)
     if (token->type == COMMENT)
         while(*p != '\0' && *p != '\n')
             p++;
+    if(token->type == DRIGHT_CHEVRON || token->type == DLEFT_CHEVRON)
+        p++;
     p++;
 }
 

@@ -35,10 +35,12 @@ typedef struct
     size_t len;
 } token;
 
+list* init_lexing(char *entry);
+
 //Main function which go throught the string and return a linked list of token
 *list lexing(char *entry);
 
-int isSeparator()
+int isSeparator(char c);
 
 //Function which create the next token
 token* read_word(char *p, int isCommand, list *token_list);
