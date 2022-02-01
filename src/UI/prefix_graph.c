@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "prefix_graph.h"
 
@@ -74,7 +75,17 @@ Pgraph *init_Pgraph()
     G->cur_pos = 0;
     G->longest = 0;
     G->over_write = 0;
+    G->last_pos = 0;
     return G;
+}
+
+LPgraph *init_LPgraph(Pgraph *G)
+{
+    LPgraph *LG = malloc(sizeof(LPgraph));
+    LG->next = NULL;
+    LG->prev = NULL;
+    LG->G = G;
+    return LG;
 }
 
 /*==================== Free struct ===============================*/
@@ -115,6 +126,18 @@ void free_Pgraph(Pgraph *G)
     free(G);
 }
 
+void free_LPgraph(LPgraph *LG)
+{
+    LPgraph *p;
+    while (LG != NULL)
+    {
+	p = LG->next;
+	free_Pgraph(LG->G);
+	free(LG);
+	LG = p;
+    }
+}
+
 /*==================== Utils ===============================*/
 
 Node* get_node(Pgraph *G, int ind)
@@ -146,6 +169,26 @@ void adjlists_insert(Pgraph *G, Adjlists *list, Adjlists *elm, char c)
         continue;
     elm->next = list->next;
     list->next = elm;
+}
+
+void LPgraph_append(LPgraph *LG, Pgraph *G)
+{
+    LPgraph *elm = init_LPgraph(G);
+    for (; LG->next; LG = LG->next)
+	continue;
+    elm->next = LG->next;
+    LG->next = elm;
+    elm->prev = LG;
+}
+
+void LPgraph_pop(LPgraph *LG)
+{
+    for (; LG->next; LG = LG->next)
+	continue;
+    LG->prev->next = LG->next;
+    LG->prev = NULL;
+    LG->next = NULL;
+    free_LPgraph(LG);
 }
 
 /*==================== Add a word in the Pgraph ===========================*/
@@ -215,6 +258,7 @@ Pgraph *create_Pgraph_with_dir(char *cur_dir)
 {
     Pgraph *G = init_Pgraph();
     struct dirent *dir;
+    struct stat buf;
 
     int len;
     DIR *d = opendir(cur_dir);
@@ -223,11 +267,22 @@ Pgraph *create_Pgraph_with_dir(char *cur_dir)
     {
 	while ((dir = readdir(d)) != NULL)
 	{
-	    len = strlen(dir->d_name);
-	    add_word(G, dir->d_name, len);
+	    len = strlen(dir->d_name) + 1;
+	    char *s = malloc(len * sizeof(char));
+	    strcpy(s, dir->d_name);
+	    
+	    if (stat(dir->d_name, &buf) == -1)
+                errx(1, "Not a file nor a directory");
+	    if (S_ISDIR(buf.st_mode))
+		strcat(s, "/");
+	    else
+	        strcat(s, " ");
+	    
+            add_word(G, s, len);
 	    G->order += len;
 	    if (G->longest < len)
 		G->longest = len;
+	    free(s);
 	}
 	closedir(d);
     }
@@ -262,7 +317,8 @@ Node* update_pos(Pgraph *G, char c, Node *node)
 
 void set_pos_to_father(Pgraph *G, Node *node)
 {
-    G->cur_pos = node->father;
+    if (G->cur_pos != 0)
+    	G->cur_pos = node->father;
 }
 
 char* __get_word(Pgraph *G, char* s)
@@ -271,15 +327,16 @@ char* __get_word(Pgraph *G, char* s)
     if (G->over_write > 0)
     {
 	G->over_write -= 1;
-	if (G->over_write == 0)
-	    set_fat = 0;
+	set_fat = 0;
     }
+    Node *node = get_node(G, G->cur_pos);
+    if (set_fat == 1)
+        set_pos_to_father(G, node);
+    else
+	node = get_node(G, node->adjlists->next->index);
     if (G->over_write == 0 && G->cur_pos != 0)
     {
 	int i = 0;
-        Node *node = get_node(G, G->cur_pos);
-	if (set_fat == 1)
-	    set_pos_to_father(G, node);
 	if (node->adjlists)
         {
             while (!node->is_end && !node->adjlists->next->next)
@@ -290,11 +347,7 @@ char* __get_word(Pgraph *G, char* s)
             }
 
             s[i] = node->value;
-	    if (node->is_end)
-	    {
-		s[i + 1] = ' ';
-		i++;
-	    }
+	    G->last_pos = node->self;
             s[i + 1] = 0;
             return s;
         }
@@ -308,30 +361,29 @@ char* __get_word(Pgraph *G, char* s)
 char* get_word(Pgraph *G, char c)
 {
     char *s = malloc((G->longest + 2) * sizeof(char));
-    if (c != '\0' && G->over_write == 0)
+    if (c != '\0')
     {
-    	Node *node = get_node(G, G->cur_pos);
-    	node = update_pos(G, c, node);
-    	int i = 0;
-    	if (node && node->adjlists)
-    	{
-	    node = get_node(G, node->adjlists->next->index);
-            while (!node->is_end && !node->adjlists->next->next)
+	if (G->over_write == 0)
+	{
+    	    Node *node = get_node(G, G->cur_pos);
+    	    node = update_pos(G, c, node);
+    	    int i = 0;
+    	    if (node && node->adjlists)
     	    {
-	        s[i] = node->value;
 	        node = get_node(G, node->adjlists->next->index);
-	        i++;
-            }
+                while (!node->is_end && !node->adjlists->next->next)
+    	        {
+	            s[i] = node->value;
+	            node = get_node(G, node->adjlists->next->index);
+	            i++;
+                }
 
-	    s[i] = node->value;
-	    if (node->is_end)
-            {
-                s[i + 1] = ' ';
-                i++;
+	        s[i] = node->value;
+		G->last_pos = node->self;
+	        s[i + 1] = 0;
+	        return s;
             }
-	    s[i + 1] = 0;
-	    return s;
-        }
+	}
 	G->over_write += 1;
 	s[0] = 0;
         return s;

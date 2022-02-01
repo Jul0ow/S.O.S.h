@@ -190,44 +190,60 @@ void _print(GtkButton *button, gpointer user_data)
 }
 */
 
-gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+void update_auto_completion(UI *ui)
+{
+    ui->G->cur_pos = ui->G->last_pos;
+    // TODO
+}
+
+void auto_completion(UI *ui)
+{
+    ui->buffer = gtk_text_view_get_buffer(ui->text_view);
+    GtkTextIter start = {0,};
+    GtkTextIter end = {0,};
+    char *text = malloc((ui->G->longest + 2) * sizeof(char));
+    gtk_text_buffer_get_start_iter(ui->buffer, &start);
+    gtk_text_buffer_get_end_iter(ui->buffer, &end);
+    text = gtk_text_buffer_get_text(ui->buffer, &start, &end, FALSE);
+    const char *s = gtk_label_get_text(ui->completion);
+    strcat(text, s);
+    gtk_text_buffer_set_text(ui->buffer, text, strlen(text));
+    gtk_text_view_set_buffer(ui->text_view, ui->buffer);
+    gtk_label_set_text(ui->completion, "");
+    
+    update_auto_completion(ui);
+
+    free(text);
+}
+
+gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
 {
     widget = widget;
     UI *ui = user_data;
 
-    if (event->keyval == GDK_KEY_Return)
+    if (evt->keyval == GDK_KEY_Return)
     {
 	evaluate_string(ui);
 	return TRUE;
     }
-    else if (event->keyval == GDK_KEY_Tab)
+    else if (evt->keyval == GDK_KEY_Tab)
     {
-	ui->buffer = gtk_text_view_get_buffer(ui->text_view);
-        GtkTextIter start = {0,};
-        GtkTextIter end = {0,};
-    	char *text = malloc((ui->G->longest + 2) * sizeof(char));
-    	gtk_text_buffer_get_start_iter(ui->buffer, &start);
-    	gtk_text_buffer_get_end_iter(ui->buffer, &end);
-    	text = gtk_text_buffer_get_text(ui->buffer, &start, &end, FALSE);
-	const char *s = gtk_label_get_text(ui->completion);
-	strcat(text, s);
-	gtk_text_buffer_set_text(ui->buffer, text, strlen(text));
-        gtk_text_view_set_buffer(ui->text_view, ui->buffer);
-        free(text);
+	auto_completion(ui);
     }
-    else if (event->keyval == GDK_KEY_BackSpace)
+    else if (evt->keyval == GDK_KEY_BackSpace)
     {
-	printf("lol\n");
         char *w = get_word(ui->G, '\0');
         gtk_label_set_text(ui->completion, w);
         free(w);
     }
     else
     {
-	char *w = get_word(ui->G, (char)event->keyval);
-	gtk_label_set_text(ui->completion, w);
-	free(w);
-        //printf("%c", (char)event->keyval);
+	if (evt->keyval != GDK_KEY_Shift_L && evt->keyval != GDK_KEY_Shift_R)
+	{
+	    char *w = get_word(ui->G, (char)evt->keyval);
+	    gtk_label_set_text(ui->completion, w);
+	    free(w);
+	}
     }
 
     return FALSE;
@@ -284,8 +300,6 @@ int main(void)
     GtkWidget *grid;
     createGrid(&grid, &scroll, "myGrid");
 
-
-
     UI ui =
     {
 	.window = window,
@@ -298,9 +312,7 @@ int main(void)
 	//.b1 = b1,
     };
 
-    char* s = get_dir(&ui);
-    ui.G = create_Pgraph_with_dir(s);
-    free(s);
+    ui.G = create_Pgraph_with_dir(".");
 
     add_line(&ui, 0, "");
 
@@ -311,6 +323,7 @@ int main(void)
     g_signal_connect(window, "key_press_event", G_CALLBACK(on_key_press), &ui);
 
     gtk_main();
+    free_Pgraph(ui.G);
 
     return 0;
 }

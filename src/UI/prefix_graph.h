@@ -32,13 +32,25 @@ typedef struct Prefix_Graph
     int cur_pos;
     int longest;
     int over_write;
+    int last_pos;
 }Pgraph;
+
+typedef struct List_Pgraph
+{
+    struct List_Pgraph *next;
+    struct List_Pgraph *prev;
+    Pgraph *G;
+}LPgraph;
 
 void print_words(Pgraph *G);
 
 Pgraph *init_Pgraph();
 
+LPgraph *init_LPgraph(Pgraph *G);
+
 void free_Pgraph(Pgraph *G);
+
+void free_LPgraph(LPgraph *LG);
 
 Node* get_node(Pgraph *G, int i);
 

@@ -20,7 +20,7 @@ int main()
     free(w);
     
     G->cur_pos = 0;
-    w = get_word(G, 'p');
+    w = get_word(G, 'M');
     printf("%s\n", w);
     free(w);
     

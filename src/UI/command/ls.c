@@ -13,7 +13,7 @@ int main()
     char *s = malloc(SIZE * sizeof(char));
     while (getcwd(s, SIZE) == NULL)
         if (realloc(s, SIZE + SIZE) == NULL) errx(1, "realloc");
-
+    
     DIR *d = opendir(s); 
     if (d)
     {
