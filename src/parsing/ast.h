@@ -1,6 +1,14 @@
 #ifndef AST_H
 #define AST_H
 
+//enum of all commands
+enum cmd
+{
+    CAT,
+    DEFAULT
+    //...
+}
+
 //node of the ast
 typedef struct ast_node
 {
@@ -46,8 +54,8 @@ typedef struct ast_node
         struct node_and_bool node_and_bool;
         struct node_or_bool node_or_bool;
         struct node_and node_and;
-        struct node_dright_chevron;
-        struct node_dleft_chevron;
+        struct node_dright_chevron node_dright_chevron;
+        struct node_dleft_chevron node_dleft_chevron;
 
         //COMMA ??????????
         struct node_comment node_command;
@@ -71,12 +79,14 @@ typedef struct ast_node
     ast_node *sibling = NULL;
 };
 
+// === STRUCTS DEF ===
 
-enum parser_status
+//command
+struct node_command
 {
-    PARSER_DONE = 0,
-    PARSER_NO_MATCH,
-    PARSER_ERROR,
+    ast_node *node;
+
+    enum cmd cmd;
 }
 
 #endif
