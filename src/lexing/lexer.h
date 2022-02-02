@@ -5,6 +5,9 @@
 #define TRUE 1
 #define FALSE 0
 
+typedef struct list list;
+typedef struct list_elm list_elm;
+
 typedef enum
 {
     //Command etc..
@@ -38,14 +41,14 @@ typedef struct
 list* init_lexing(char *entry);
 
 //Main function which go throught the string and return a linked list of token
-*list lexing(char *entry);
+void lexing(char *entry, list* token, char end);
 
 int isSeparator(char c);
 
 //Function which create the next token
-token* read_word(char *p, int isCommand, list *token_list);
+void read_word(char *p, int isCommand, list *token_list);
 
-token* read_separator(char *p, list *token_list);
+void read_separator(char *p, list *token_list);
 
 //Return TRUE if the char is a Separator
 int isSeparator(char c);

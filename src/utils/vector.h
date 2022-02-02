@@ -19,39 +19,39 @@ typedef struct
 // Be careful, you have to allocate two memory spaces.
 // - The memory space that holds the 'struct vector' variable.
 // - The memory space that holds the data.
-struct vector *vector_new();
+vector *vector_new();
 
 // Delete a vector.
 // Free all the allocated memory.
 // After this instruction, the vector can no longer be used.
-void vector_free(struct vector *v);
+void vector_free(vector *v);
 
 // Double the capacity of a vector.
 // (Use the realloc() function of the standard library.)
 // If there is not enough memory, the program prints
 // "Not enough memory!" and exits with the error code 1.
 // (Use the errx() function of the standard library.)
-void double_capacity(struct vector *v);
+void double_capacity(vector *v);
 
 // Append x at the end of a vector.
 // According to the size of the vector,
 // you may multiply its capacity by two.
 // (Use the double_capacity() function.)
-void vector_push(struct vector *v, char x);
+void vector_push(vector *v, char x);
 
 // Remove and return the last element of a vector.
 // - If the vector is not empty, the last element
 //   is removed from the vector, its value is stored in x,
 //   and the function returns true (1).
 // - Otherwise the function returns false (0).
-int vector_pop(struct vector *v, char *x);
+int vector_pop(vector *v, char *x);
 
 // Get the value at the i index.
 // - If the i index is not out of bound,
 //   the i-index element is stored in x,
 //   and the function returns true (1).
 // - Otherwise the function returns false (0).
-int vector_get(struct vector *v, size_t i, char *x);
+int vector_get(vector *v, size_t i, char *x);
 
 // Insert x in the vector at the i-index position.
 // The i index must be between 0 and v->size (included).
@@ -59,13 +59,13 @@ int vector_get(struct vector *v, size_t i, char *x);
 // you may multiply its capacity by two.
 // (Use the double_capacity() function.)
 // If the i index is out of bound, do nothing.
-void vector_insert(struct vector *v, size_t i, char x);
+void vector_insert(vector *v, size_t i, char x);
 
 // Remove and return the i-index element of a vector.
 // - If the i index is not out of bound,
 //   the i-index element is removed, its value is stored in x,
 //   and the function returns true (1).
 // - Otherwise the function returns false (0).
-int vector_remove(struct vector *v, size_t i, char *x);
+int vector_remove(vector *v, size_t i, char *x);
 
 #endif

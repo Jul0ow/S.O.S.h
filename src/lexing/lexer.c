@@ -33,43 +33,47 @@ list* init_lexing(char *entry)
 
     lexing(entry, token_list, '\0');
 
-    return list;
+    return token_list;
 }
 
 //First function to be called, only once and always the function
 //can be called in ` quote
-token* read_word(char *p, int isCommand, list *token_list) 
+void read_word(char *p, int isCommand, list *token_list) 
 {
-    //initializing the vector containing the string and its length
-    vector *v = vector_new();
-    //initializing the token that will be returned
-    token *new = xmalloc(sizeof(token));
-
-    if(isCommand)
-        new->type = COMMAND;
+    if (isSeparator(*p))
+        read_separator(p, token_list);
     else
-        new->type = ARGUMENT;
+    {
+        //initializing the vector containing the string and its length
+        vector *v = vector_new();
+        //initializing the token that will be returned
+        token *new = xmalloc(sizeof(token));
 
-    while (!isSeparator(*p))
-        vector_push(v, p);
+        if(isCommand)
+            new->type = COMMAND;
+        else
+            new->type = ARGUMENT;
 
-    vector_push(v, '\0')
+        while (!isSeparator(*p))
+            vector_push(v, *(p++));
 
-    new->string = xmalloc(v->size*sizeof(char));
+        vector_push(v, '\0');
 
-    strcpy(new->string, v->string);
-    
-    new->len = v->size;
+        new->string = xmalloc(v->size*sizeof(char));
 
-    vector_free(v);
+        strcpy(new->string, v->string);
 
-    list_push_end(token_list, new);
-    return new;
+        new->len = v->size;
+
+        vector_free(v);
+
+        list_push_end(token_list, new);
+    }
 }
 
-token* read_separator(char *p, list *token_list)
+void read_separator(char *p, list *token_list)
 {
-    token *new = xmalloc(sizeof(token));
+    token *token = xmalloc(sizeof(token));
 
     switch (*p)
     {
@@ -100,7 +104,7 @@ token* read_separator(char *p, list *token_list)
             else
                 token->type = RIGHT_CHEVRON;
             break;
-        
+
         case '#':
             token->type = COMMENT;
             break;
@@ -115,11 +119,11 @@ token* read_separator(char *p, list *token_list)
 
         case ')':
             token->type = RIGHT_PAREN;
-            
+            break;
         case '\'':
             token->type = QUOTE;
             break;
-        
+
         case '\"':
             token->type = DOUBLE_QUOTES;
             break;
@@ -138,6 +142,8 @@ token* read_separator(char *p, list *token_list)
     if(token->type == DRIGHT_CHEVRON || token->type == DLEFT_CHEVRON)
         p++;
     p++;
+
+    list_push_end(token_list, token);
 }
 
 void lexing(char *entry, list* token_list, char end)
@@ -151,7 +157,7 @@ void lexing(char *entry, list* token_list, char end)
             p++;
 
     if(*p == end)
-        break;
+        return;
 
     read_word(p, TRUE, token_list);
 

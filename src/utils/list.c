@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "list.h"
 #include "lexer.h"
+#include "xmalloc.h"
 
 void list_init(list *list)
 {
@@ -17,7 +18,7 @@ size_t list_len(list *list)
 {
     list_elm *p = list->head;
     size_t acc = 0;
-    while(p->next != list_tail)
+    while(p->next != list->tail)
     {
         acc++;
         p = p->next;
@@ -60,7 +61,7 @@ token *list_pop_front(list *list)
     return t;
 }
 
-token *list_find(list *list, token *token)
+list_elm *list_find(list *list, token *token)
 {
     list_elm *p = list->head;
     while(p != NULL)

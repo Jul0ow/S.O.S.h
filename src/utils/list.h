@@ -2,17 +2,17 @@
 #define _LIST_H_
 #include "lexer.h"
 
-typedef struct
+struct list
 {
     struct list_elm *head;
     struct list_elm *tail;
-}list;
+};
 
-typedef struct 
+struct list_elm
 {
   struct list_elm *next;
   token *token;
-}list_elm;
+};
 
 // Initialize the sentinel of an empty list.
 void list_init(list *list);
@@ -42,7 +42,7 @@ token *list_pop_front(list *list);
 // Search for the first element that contains 'value' and return it
 // (without removing it from the list).
 // The function returns NULL if the value is not in the list.
-token *list_find(list *list, token *token);
+list_elm *list_find(list *list, token *token);
 
 // Reverse the elements of the list (except for the sentinel).
 void list_rev(list *list);
