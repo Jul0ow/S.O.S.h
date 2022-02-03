@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 #include <err.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -41,6 +42,7 @@ void print_words(Pgraph *G)
 Adjlists *init_adjlists(int i)
 {
     Adjlists *adjl = malloc(sizeof(Adjlists));
+    if (adjl == NULL) errx(1, "fail malloc adjlists");
     adjl->next = NULL;
     adjl->index = i;
     return adjl;
@@ -49,6 +51,7 @@ Adjlists *init_adjlists(int i)
 Node *init_node(char v, int end, int self, int father, Adjlists *adjl)
 {
     Node *node = malloc(sizeof(Node));
+    if (node == NULL) errx(1, "fail malloc node");
     node->value = v;
     node->is_end = end;
     node->self = self;
@@ -59,23 +62,46 @@ Node *init_node(char v, int end, int self, int father, Adjlists *adjl)
 
 List *init_list(Node *node)
 {
+    //printf("OKOKOK\n");
     List *l = malloc(sizeof(List));
+    //printf("OKOKOK\n");
+    if (l == NULL) errx(1, "fail malloc list");
+    //printf("OKOKOK\n");
     l->next = NULL;
     l->node = node;
     return l;
 }
 
+Word *init_word()
+{
+    Word *w = malloc(sizeof(Word));
+    if (w == NULL) errx(1, "fail malloc word");
+    w->w = NULL;
+    w->index = 0;
+    return w;
+}
+
 Pgraph *init_Pgraph()
 {
     Pgraph *G = malloc(sizeof(Pgraph));
-    G->father = vector_new();
+    if (G == NULL) errx(1, "fail malloc graph");
+    //printf("OKOK1\n");
     Node *node = init_node('$', 0, 0, -1, NULL);
+    //printf("OKOK2\n");
     G->nodes = init_list(node);
+    //printf("OKOK3\n");
     G->order = 1;
+    //printf("OKOK4\n");
     G->cur_pos = 0;
+    //printf("OKOK5\n");
     G->longest = 0;
+    //printf("OKOK6\n");
     G->over_write = 0;
+    //printf("OKOK7\n");
     G->last_pos = 0;
+    //printf("OKOK8\n");
+    G->word = init_word();
+    //printf("OKOK9\n");
     return G;
 }
 
@@ -119,10 +145,16 @@ void free_list(List *l)
     }
 }
 
+void free_word(Word *wrd)
+{
+    free(wrd->w);
+    free(wrd);
+}
+
 void free_Pgraph(Pgraph *G)
 {
-    vector_free(G->father);
     free_list(G->nodes);
+    free_word(G->word);
     free(G);
 }
 
@@ -256,9 +288,11 @@ void add_word(Pgraph *G, char *word, size_t size)
 
 Pgraph *create_Pgraph_with_dir(char *cur_dir)
 {
+    printf("OKOK\n");
     Pgraph *G = init_Pgraph();
+    printf("OKOK\n");
     struct dirent *dir;
-    struct stat buf;
+    // struct stat buf;
 
     int len;
     DIR *d = opendir(cur_dir);
@@ -267,16 +301,31 @@ Pgraph *create_Pgraph_with_dir(char *cur_dir)
     {
 	while ((dir = readdir(d)) != NULL)
 	{
-	    len = strlen(dir->d_name) + 1;
+	    len = strlen(dir->d_name) + 2;
 	    char *s = malloc(len * sizeof(char));
+	    //if (s == NULL) errx(1, "fail malloc");
 	    strcpy(s, dir->d_name);
 	    
-	    if (stat(dir->d_name, &buf) == -1)
-                errx(1, "Not a file nor a directory");
+	    /*if (stat(dir->d_name, &buf) == -1)
+	    {
+		perror("Error type");
+                errx(1, "%s: Not a file nor a directory", dir->d_name);
+	    }
 	    if (S_ISDIR(buf.st_mode))
 		strcat(s, "/");
 	    else
-	        strcat(s, " ");
+	        strcat(s, " ");*/
+	    DIR *tmp;
+	    if ((tmp = opendir(dir->d_name)) == NULL)
+	    {
+		//printf("%s\n", dir->d_name);
+		strcat(s, " ");
+	    }
+	    else
+	    {
+		strcat(s, "/");
+		closedir(tmp);
+	    }
 	    
             add_word(G, s, len);
 	    G->order += len;
@@ -284,6 +333,8 @@ Pgraph *create_Pgraph_with_dir(char *cur_dir)
 		G->longest = len;
 	    free(s);
 	}
+	G->word->w = malloc((G->longest + 2) * sizeof(char));
+	//if (G->word->w == NULL) errx(1, "fail malloc");
 	closedir(d);
     }
 
@@ -321,6 +372,30 @@ void set_pos_to_father(Pgraph *G, Node *node)
     	G->cur_pos = node->father;
 }
 
+char *min_word(Pgraph *G, Node *node, char *s)
+{
+    int i = 0;
+    while (!node->is_end && !node->adjlists->next->next)
+    {
+        s[i] = node->value;
+        node = get_node(G, node->adjlists->next->index);
+        i++;
+    }
+
+    if (node->adjlists->next && node->adjlists->next->next)
+    {
+	s[i] = node->value;
+	G->last_pos = node->self;
+	s[i + 1] = 0;
+    }
+    else
+    {
+        s[i] = 0;
+        G->last_pos = node->father;
+    }
+    return s;
+}
+
 char* __get_word(Pgraph *G, char* s)
 {
     int set_fat = 1;
@@ -329,29 +404,24 @@ char* __get_word(Pgraph *G, char* s)
 	G->over_write -= 1;
 	set_fat = 0;
     }
+    else if (G->word->index > 0)
+    {
+	G->word->index--;
+	G->word->w[G->word->index] = 0;
+    }
+    
     Node *node = get_node(G, G->cur_pos);
     if (set_fat == 1)
-        set_pos_to_father(G, node);
-    else
-	node = get_node(G, node->adjlists->next->index);
-    if (G->over_write == 0 && G->cur_pos != 0)
     {
-	int i = 0;
-	if (node->adjlists)
-        {
-            while (!node->is_end && !node->adjlists->next->next)
-            {
-                s[i] = node->value;
-                node = get_node(G, node->adjlists->next->index);
-                i++;
-            }
-
-            s[i] = node->value;
-	    G->last_pos = node->self;
-            s[i + 1] = 0;
-            return s;
-        }
+        set_pos_to_father(G, node);
     }
+    else
+        node = get_node(G, node->adjlists->next->index);
+    
+    if (G->over_write == 0 && G->cur_pos != 0)
+	if (node->adjlists)
+	    return min_word(G, node, s);
+
     s[0] = 0;
     return s;
 }
@@ -367,21 +437,15 @@ char* get_word(Pgraph *G, char c)
 	{
     	    Node *node = get_node(G, G->cur_pos);
     	    node = update_pos(G, c, node);
-    	    int i = 0;
     	    if (node && node->adjlists)
     	    {
 	        node = get_node(G, node->adjlists->next->index);
-                while (!node->is_end && !node->adjlists->next->next)
-    	        {
-	            s[i] = node->value;
-	            node = get_node(G, node->adjlists->next->index);
-	            i++;
-                }
-
-	        s[i] = node->value;
-		G->last_pos = node->self;
-	        s[i + 1] = 0;
-	        return s;
+		G->word->w[G->word->index] = c;
+		//printf("%i, %c\n", node->self, node->value);
+		//printf("%i\n", G->cur_pos);
+		G->word->index++;
+		G->word->w[G->word->index] = 0;
+		return min_word(G, node, s);
             }
 	}
 	G->over_write += 1;
@@ -390,5 +454,4 @@ char* get_word(Pgraph *G, char c)
     }
     else
 	return __get_word(G, s);
-
 }

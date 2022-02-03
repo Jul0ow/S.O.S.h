@@ -24,15 +24,21 @@ typedef struct List_Graph
     Node *node;
 }List;
 
+typedef struct Word
+{
+    char *w;
+    int index;
+}Word;
+
 typedef struct Prefix_Graph
 {
-    Vector *father;
     List *nodes;
     int order;
     int cur_pos;
     int longest;
     int over_write;
     int last_pos;
+    Word *word;
 }Pgraph;
 
 typedef struct List_Pgraph
@@ -52,7 +58,13 @@ void free_Pgraph(Pgraph *G);
 
 void free_LPgraph(LPgraph *LG);
 
+void LPgraph_append(LPgraph *LG, Pgraph *G);
+
+void LPgraph_pop(LPgraph *LG);
+
 Node* get_node(Pgraph *G, int i);
+
+void set_pos_to_father(Pgraph *G, Node *node);
 
 Pgraph *create_Pgraph_with_dir(char *cur_dir);
 

@@ -8,11 +8,8 @@
 
 int main()
 {
-    char *s = malloc(SIZE * sizeof(char));
-    while (getcwd(s, SIZE) == NULL)
-        if (realloc(s, SIZE + SIZE) == NULL) errx(1, "realloc");
-    Pgraph *G = create_Pgraph_with_dir(s);
-    print_words(G);
+    Pgraph *G = create_Pgraph_with_dir(".");
+    /*print_words(G);
     
     char *w = get_word(G, 'l');
     printf("\n");
@@ -36,9 +33,50 @@ int main()
 
     w = get_word(G, '\0');
     printf("%s\n", w);
+    free(w);*/
+
+    /*
+    char *w = get_word(G, 'M');
+    free(w);
+    w = get_word(G, 'a');
+    free(w);
+    w = get_word(G, 'k');
+    free(w);
+    w = get_word(G, 'e');
+    free(w);
+    w = get_word(G, 'f');
+    free(w);
+    w = get_word(G, 'i');
+    free(w);
+    w = get_word(G, 'l');
+    free(w);
+    w = get_word(G, 'e');
     free(w);
 
-    free_Pgraph(G);
-    free(s);
+    printf("%s\n", G->word->w);*/
+
+    LPgraph *LG = init_LPgraph(G);
+    Pgraph *G1 = create_Pgraph_with_dir("../../../S.O.S.h/src/UI/");
+    Pgraph *G2 = create_Pgraph_with_dir("command");
+    Pgraph *G3 = create_Pgraph_with_dir("data");
+    LPgraph_append(LG, G1);
+    LPgraph_append(LG, G2);
+    LPgraph_append(LG, G3);
+
+    for (LPgraph *l = LG; l; l = l->next)
+    {
+	printf("=======================\n");
+	print_words(l->G);
+    }
+
+    LPgraph_pop(LG);
+
+    for (LPgraph *l = LG; l; l = l->next)
+    {
+        printf("=======================\n");
+        print_words(l->G);
+    }
+
+    free_LPgraph(LG);
     return 0;
 }
