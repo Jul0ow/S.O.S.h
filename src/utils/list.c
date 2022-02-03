@@ -32,9 +32,15 @@ void list_push_end(list *list, token *t)
     list_elm *elm = xmalloc(sizeof(list_elm));
     elm->token = t;
     if (list->head == NULL)
+    {
         list->head = elm;
-    list->tail->next = elm;
-    list->tail = elm;
+        list->tail = elm;
+    } 
+    else
+    {
+        list->tail->next = elm;
+        list->tail = elm;
+    }
 }
 
 void list_push_front(list *list, token *t)

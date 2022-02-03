@@ -15,7 +15,7 @@ main: $(OBJ)
 
 test: CFLAGS += -lcriterion
 test: $(TEST_OBJ)
-	$(CC) $(CFLAGS) $(OBJ) $(HEA) -o main
+	$(CC) $(CFLAGS) $(TEST_OBJ) $(HEA) -o test
 
  
 

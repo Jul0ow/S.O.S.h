@@ -5,8 +5,6 @@
 #define TRUE 1
 #define FALSE 0
 
-TestSuite(SOSH);
-
 int compareList(list *l1, list *l2)
 {
     list_elm *p1= l1->head, *p2 = l2->head;
@@ -27,6 +25,18 @@ int compareList(list *l1, list *l2)
     return p1 == p2;
 }
 
+void freeL(list *l)
+{
+    list_elm *elm = l->head;
+    while(l != NULL)
+    {
+        list_elm *next = elm->next;
+        free(elm->token);
+        free(elm);
+        elm = next;
+    }
+    free(l);
+}
 
 Test(SOSH,simpleLexing)
 {
@@ -47,8 +57,10 @@ Test(SOSH,simpleLexing)
 
     list_push_end(&echo1, &c1);
     list_push_end(&echo1, &c2);
-    cr_expect(compareList(init_lexing("echo bonjour"), &echo1), 
+    list* l = init_lexing("echo bonjour");
+    cr_expect(compareList(l, &echo1) == 1, 
             "trying to parse \"echo bonjour\"");
+    //freeL(l);
 }
 
 Test(SOSH, separator)
@@ -175,7 +187,8 @@ Test(SOSH, separator)
     list_push_end(&echo1, &c19);//,
     list_push_end(&echo1, &c17);//)
     list_push_end(&echo1, &c18);//#
-
-    cr_assert(compareList(init_lexing("alors oui;,&,&&|,||\'\"\`<<,>>,<,>(,)#"),
-                &echo1), "Trying to parse separator");
+    
+    list* l = init_lexing("alors oui;,&,&&|,||\'\"`<<,>>,<,>(,)#");
+    cr_assert(compareList(l, &echo1) == 1, "Trying to parse separator");
+    //œfreeL(l);
 }
