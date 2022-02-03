@@ -24,5 +24,5 @@ void * xrealloc(void * pointer, size_t mem)
     pointer = realloc(pointer, mem);
     if(pointer == NULL)
         err(errno, "Error in allocating memory");
-    res;
+    return pointer;
 }

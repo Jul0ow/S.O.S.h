@@ -4,6 +4,7 @@
 #include <string.h>
 #define TRUE 1
 #define FALSE 0
+
 TestSuite(SOSH);
 
 int compareList(list *l1, list *l2)
@@ -18,7 +19,7 @@ int compareList(list *l1, list *l2)
         if (t1->len != t2->len)
             return FALSE;
         if (!strcmp(t1->string, t2->string))
-            return FALSE
+            return FALSE;
         p1 = p1->next;
         p2 = p2->next;
     }
@@ -44,9 +45,9 @@ Test(SOSH,simpleLexing)
             7
     };
 
-    list_push_end(&echo1, c1);
-    list_push_end(&echo1, c2);
-    cr_expect(compareList(init_lexing("echo bonjour"), echo1), 
+    list_push_end(&echo1, &c1);
+    list_push_end(&echo1, &c2);
+    cr_expect(compareList(init_lexing("echo bonjour"), &echo1), 
             "trying to parse \"echo bonjour\"");
 }
 
@@ -95,7 +96,7 @@ Test(SOSH, separator)
 
     token c8 = {
             QUOTE,
-            "\'",
+            "'",
             1
     };
     token c9 = {
@@ -105,15 +106,10 @@ Test(SOSH, separator)
     };
     token c10 = {
             BACKTICK,
-            "\`",
+            "`",
             1
     };
 
-    token c11 = {
-            SEMI_COLON,
-            ";",
-            1
-    };
     token c12 = {
             DLEFT_CHEVRON,
             "<<",
@@ -155,30 +151,30 @@ Test(SOSH, separator)
             1
     };
 
-    list_push_end(&echo1, c1); //echo
-    list_push_end(&echo1, c2); //oui
-    list_push_end(&echo1, c3); //;
-    list_push_end(&echo1, c19); //,
-    list_push_end(&echo1, c5);//&
-    list_push_end(&echo1, c19);//,
-    list_push_end(&echo1, c4);//&&
-    list_push_end(&echo1, c6);//|
-    list_push_end(&echo1, c19);//,
-    list_push_end(&echo1, c7);//||
-    list_push_end(&echo1, c8);//\'
-    list_push_end(&echo1, c9);//\"
-    list_push_end(&echo1, c10);//\`
-    list_push_end(&echo1, c12);//<<
-    list_push_end(&echo1, c19);//,
-    list_push_end(&echo1, c13);//>>
-    list_push_end(&echo1, c19);//,
-    list_push_end(&echo1, c14);//<
-    list_push_end(&echo1, c19);//,
-    list_push_end(&echo1, c15);//>
-    list_push_end(&echo1, c16);//(
-    list_push_end(&echo1, c19);//,
-    list_push_end(&echo1, c17);//)
-    list_push_end(&echo1, c18);//#
+    list_push_end(&echo1, &c1); //echo
+    list_push_end(&echo1, &c2); //oui
+    list_push_end(&echo1, &c3); //;
+    list_push_end(&echo1, &c19); //,
+    list_push_end(&echo1, &c5);//&
+    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c4);//&&
+    list_push_end(&echo1, &c6);//|
+    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c7);//||
+    list_push_end(&echo1, &c8);//\'
+    list_push_end(&echo1, &c9);//\"
+    list_push_end(&echo1, &c10);//\`
+    list_push_end(&echo1, &c12);//<<
+    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c13);//>>
+    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c14);//<
+    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c15);//>
+    list_push_end(&echo1, &c16);//(
+    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c17);//)
+    list_push_end(&echo1, &c18);//#
 
     cr_assert(compareList(init_lexing("alors oui;,&,&&|,||\'\"\`<<,>>,<,>(,)#"),
                 &echo1), "Trying to parse separator");

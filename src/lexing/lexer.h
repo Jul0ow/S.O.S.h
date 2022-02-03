@@ -31,7 +31,7 @@ typedef enum
 } token_type;
 
 //Token struct containing the string and the type of token
-typedef struct 
+typedef struct token
 {
     token_type type;
     char *string;

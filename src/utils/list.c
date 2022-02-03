@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "xmalloc.h"
 
+
 void list_init(list *list)
 {
     list->head = NULL;
