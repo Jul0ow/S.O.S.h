@@ -25,4 +25,4 @@ test: $(TEST_OBJ)
 
 clean:
 	$(RM) $(OBJ)
-	$(RM) main
+	$(RM) main test

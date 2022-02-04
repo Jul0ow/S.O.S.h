@@ -3,7 +3,7 @@
 #include "lexer.h"
 #include "xmalloc.h"
 #include <string.h>
-#define NB_SEPARATOR 13
+#define NB_SEPARATOR 15
 
 //Array containing all separator that you can find everywhere
 //(for example whitout - because it is a separator only at the beginning of a word)
@@ -11,7 +11,7 @@ const char separator[] = {
     ' ', '|', ';','>',
     '<','\t', '\n', '\'',
     '"','`', '(',')',
-    '&','\0'
+    '&','\0','#'
 };
 
 int isSeparator(char c)
@@ -38,10 +38,17 @@ list* init_lexing(char *entry)
 
 //First function to be called, only once and always the function
 //can be called in ` quote
-void read_word(char *p, int isCommand, list *token_list) 
+size_t read_word(char *p, int isCommand, list *token_list) 
 {
     if (isSeparator(*p))
-        read_separator(p, token_list);
+    {
+        int res = read_separator(p, token_list);
+        if (res)
+            return token_list->tail->token->len;
+        else
+            return 1;
+        
+    }
     else
     {
         //initializing the vector containing the string and its length
@@ -63,87 +70,103 @@ void read_word(char *p, int isCommand, list *token_list)
 
         strcpy(new->string, v->string);
 
-        new->len = v->size;
+        new->len = v->size-1;
 
         vector_free(v);
 
         list_push_end(token_list, new);
+        
+        return new->len;
     }
 }
 
-void read_separator(char *p, list *token_list)
+int read_separator(char *p, list *token_list)
 {
-    token *token = xmalloc(sizeof(token));
-
+    token *t = xmalloc(sizeof(token));
+    t->len = (size_t)1;
     switch (*p)
     {
         case '&':
             if (*(p+1) == '&')
-                token->type = AND_BOOL;
+            {
+                t->len = 2;
+                t->type = AND_BOOL;
+            }
             else
-                token->type = AND;
+                t->type = AND;
             break;
 
         case '|':
             if (*(p+1) == '|')
-                token->type = OR_BOOL;
+            {
+                t->len = 2;
+                t->type = OR_BOOL;
+            }
             else
-                token->type = PIPE;
+                t->type = PIPE;
             break;
 
         case '<':
             if(*(p+1) == '<')
-                token->type = DLEFT_CHEVRON;
+            {
+                t->type = DLEFT_CHEVRON;
+                t->len = 2;
+            }
             else
-                token->type = LEFT_CHEVRON;
+                t->type = LEFT_CHEVRON;
             break;
 
         case '>':
             if(*(p+1) == '>')
-                token->type = DRIGHT_CHEVRON;
+            {
+                t->type = DRIGHT_CHEVRON;
+                t->len = 2;
+            }
             else
-                token->type = RIGHT_CHEVRON;
+                t->type = RIGHT_CHEVRON;
             break;
 
         case '#':
-            token->type = COMMENT;
+            t->type = COMMENT;
+            size_t add = 0;
+            while (*(p + add) != '\0' && *(p + add) != '\n')
+            {
+                add++;
+            }
+            t->len = add;
+
             break;
 
         case ';':
-            token->type = SEMI_COLON;
+            t->type = SEMI_COLON;
             break;
 
         case '(':
-            token->type = LEFT_PAREN;
+            t->type = LEFT_PAREN;
             break;
 
         case ')':
-            token->type = RIGHT_PAREN;
+            t->type = RIGHT_PAREN;
             break;
         case '\'':
-            token->type = QUOTE;
+            t->type = QUOTE;
             break;
 
         case '\"':
-            token->type = DOUBLE_QUOTES;
+            t->type = DOUBLE_QUOTES;
             break;
 
         case '`':
-            token->type = BACKTICK;
+            t->type = BACKTICK;
             break;
 
         default:
-            token->type = UNKNOWN;
-            break;
+            t->type = UNKNOWN; //or space
+            free(t);
+            return FALSE;
     }
-    if (token->type == COMMENT)
-        while(*p != '\0' && *p != '\n')
-            p++;
-    if(token->type == DRIGHT_CHEVRON || token->type == DLEFT_CHEVRON)
-        p++;
-    p++;
-
-    list_push_end(token_list, token);
+    list_push_end(token_list, t);
+    return TRUE;
 }
 
 void lexing(char *entry, list* token_list, char end)
@@ -153,16 +176,18 @@ void lexing(char *entry, list* token_list, char end)
 
     //if we are not bewteen simple or double quotes we do not use space
     if (end != '\'' && end != '"') 
-        while (*p != end)
+        while (*p != end && *p == ' ')
             p++;
 
     if(*p == end)
         return;
 
     read_word(p, TRUE, token_list);
+    p += token_list->tail->token->len;
+
 
     while (*p != end)
     {
-        read_word(p, FALSE, token_list);
+        p += read_word(p, FALSE, token_list);
     }
 }

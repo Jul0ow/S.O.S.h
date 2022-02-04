@@ -1,4 +1,5 @@
 #include <criterion/criterion.h>
+#include <criterion/logging.h>
 #include "lexer.h"
 #include "list.h"
 #include <string.h>
@@ -8,34 +9,47 @@
 int compareList(list *l1, list *l2)
 {
     list_elm *p1= l1->head, *p2 = l2->head;
-    
+
     while (p1 != NULL && p2 != NULL)
     {
         token *t1 = p1->token, *t2 = p2->token;
+        //cr_log_info("type : %i || %i\n", t1->type, t2->type);
         if (t1->type != t2->type)
             return FALSE;
-        if (t1->len != t2->len)
-            return FALSE;
-        if (!strcmp(t1->string, t2->string))
-            return FALSE;
+        if(t1->type == ARGUMENT || t1->type == COMMAND)
+        {
+            //cr_log_info("len : %li || %li\n", t1->len, t2->len);
+            if (t1->len != t2->len)
+                return FALSE;
+
+            //cr_log_info("string : %s || %s\n", t1->string, t2->string);
+            if (!(strcmp(t1->string, t2->string) == 0))
+                return FALSE;
+        }
         p1 = p1->next;
         p2 = p2->next;
+
     }
 
     return p1 == p2;
 }
 
-void freeL(list *l)
+void freeL(list *l, int rToken)
 {
     list_elm *elm = l->head;
-    while(l != NULL)
+    while(elm != NULL)
     {
         list_elm *next = elm->next;
-        free(elm->token);
+        if (rToken)
+        {
+            if(elm->token->type == COMMAND || elm->token->type == ARGUMENT)
+            free(elm->token->string);
+            free(elm->token);
+        }
         free(elm);
         elm = next;
     }
-    free(l);
+    //free(l);
 }
 
 Test(SOSH,simpleLexing)
@@ -60,7 +74,9 @@ Test(SOSH,simpleLexing)
     list* l = init_lexing("echo bonjour");
     cr_expect(compareList(l, &echo1) == 1, 
             "trying to parse \"echo bonjour\"");
-    //freeL(l);
+    freeL(l, TRUE);
+    freeL(&echo1, FALSE);
+    free(l);
 }
 
 Test(SOSH, separator)
@@ -162,33 +178,65 @@ Test(SOSH, separator)
             ",",
             1
     };
+    token c20 = {
+            ARGUMENT,
+            ",",
+            1
+    };
+    token c21 = {
+            ARGUMENT,
+            ",",
+            1
+    };
+    token c22 = {
+            ARGUMENT,
+            ",",
+            1
+    };
+    token c23 = {
+            ARGUMENT,
+            ",",
+            1
+    };
+    token c24 = {
+            ARGUMENT,
+            ",",
+            1
+    };
+    token c25 = {
+            ARGUMENT,
+            ",",
+            1
+    };
 
     list_push_end(&echo1, &c1); //echo
     list_push_end(&echo1, &c2); //oui
     list_push_end(&echo1, &c3); //;
     list_push_end(&echo1, &c19); //,
     list_push_end(&echo1, &c5);//&
-    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c20);//,
     list_push_end(&echo1, &c4);//&&
     list_push_end(&echo1, &c6);//|
-    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c21);//,
     list_push_end(&echo1, &c7);//||
     list_push_end(&echo1, &c8);//\'
     list_push_end(&echo1, &c9);//\"
     list_push_end(&echo1, &c10);//\`
     list_push_end(&echo1, &c12);//<<
-    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c22);//,
     list_push_end(&echo1, &c13);//>>
-    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c23);//,
     list_push_end(&echo1, &c14);//<
-    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c24);//,
     list_push_end(&echo1, &c15);//>
     list_push_end(&echo1, &c16);//(
-    list_push_end(&echo1, &c19);//,
+    list_push_end(&echo1, &c25);//,
     list_push_end(&echo1, &c17);//)
     list_push_end(&echo1, &c18);//#
     
     list* l = init_lexing("alors oui;,&,&&|,||\'\"`<<,>>,<,>(,)#");
     cr_assert(compareList(l, &echo1) == 1, "Trying to parse separator");
-    //œfreeL(l);
+    freeL(l, TRUE);
+    freeL(&echo1, FALSE);
+    free(l);
 }

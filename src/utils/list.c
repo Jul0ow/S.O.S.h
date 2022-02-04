@@ -31,6 +31,7 @@ void list_push_end(list *list, token *t)
 {
     list_elm *elm = xmalloc(sizeof(list_elm));
     elm->token = t;
+    elm->next = NULL;
     if (list->head == NULL)
     {
         list->head = elm;
