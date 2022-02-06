@@ -22,8 +22,7 @@ typedef struct UserInterface
     GtkTextView *text_view;
     GtkTextBuffer *buffer;
     GtkLabel *completion;
-    LPgraph *LG;
-    Pgraph *G;
+    Pgraphs *Gs;
     //GtkButton *b1;
 }UI;
 

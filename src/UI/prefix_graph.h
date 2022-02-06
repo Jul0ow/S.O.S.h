@@ -41,26 +41,38 @@ typedef struct Prefix_Graph
     Word *word;
 }Pgraph;
 
-typedef struct List_Pgraph
+typedef struct List_word
 {
-    struct List_Pgraph *next;
-    struct List_Pgraph *prev;
+    struct List_word *next;
+    struct List_word *prev;
+    struct List_word *tail;
+    char *word;
+}LW;
+
+typedef struct Pgraphs
+{
     Pgraph *G;
-}LPgraph;
+    Vector *v;
+    LW *lw;
+}Pgraphs;
 
 void print_words(Pgraph *G);
 
+void print_LW(LW *lw);
+
 Pgraph *init_Pgraph();
 
-LPgraph *init_LPgraph(Pgraph *G);
+Pgraphs *init_Pgraphs(Pgraph *G);
 
 void free_Pgraph(Pgraph *G);
 
-void free_LPgraph(LPgraph *LG);
+void free_Pgraphs(Pgraphs *Gs);
 
-void LPgraph_append(LPgraph *LG, Pgraph *G);
+void reinit_word(Pgraph *G);
 
-void LPgraph_pop(LPgraph *LG);
+void LW_append(LW *lw, char *w);
+
+void LW_pop(LW *lw);
 
 Node* get_node(Pgraph *G, int i);
 

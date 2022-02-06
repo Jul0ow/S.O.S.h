@@ -18,16 +18,7 @@
         <property name="orientation">vertical</property>
         <property name="position">40</property>
         <child>
-          <object class="GtkButton" id="Button1">
-            <property name="label" translatable="yes">Add</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="resize">False</property>
-            <property name="shrink">True</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scroll">

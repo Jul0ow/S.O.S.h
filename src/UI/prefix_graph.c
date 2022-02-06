@@ -105,13 +105,23 @@ Pgraph *init_Pgraph()
     return G;
 }
 
-LPgraph *init_LPgraph(Pgraph *G)
+LW *init_LW(char *w)
 {
-    LPgraph *LG = malloc(sizeof(LPgraph));
-    LG->next = NULL;
-    LG->prev = NULL;
-    LG->G = G;
-    return LG;
+    LW *lw = malloc(sizeof(LW));
+    lw->next = NULL;
+    lw->prev = NULL;
+    lw->tail = lw;
+    lw->word = w;
+    return lw;
+}
+
+Pgraphs *init_Pgraphs(Pgraph *G)
+{
+    Pgraphs *Gs = malloc(sizeof(Pgraphs));
+    Gs->G = G;
+    Gs->v = vector_new();
+    Gs->lw = init_LW(NULL);
+    return Gs;
 }
 
 /*==================== Free struct ===============================*/
@@ -158,19 +168,36 @@ void free_Pgraph(Pgraph *G)
     free(G);
 }
 
-void free_LPgraph(LPgraph *LG)
+void free_LW(LW* lw)
 {
-    LPgraph *p;
-    while (LG != NULL)
+    LW *p;
+    while (lw != NULL)
     {
-	p = LG->next;
-	free_Pgraph(LG->G);
-	free(LG);
-	LG = p;
+        p = lw->next;
+        free(lw->word);
+	//free(lw->tail);
+        free(lw);
+        lw = p;
     }
 }
 
+void free_Pgraphs(Pgraphs *Gs)
+{
+    free_Pgraph(Gs->G);
+    vector_free(Gs->v);
+    free_LW(Gs->lw);
+    free(Gs);
+}
+
 /*==================== Utils ===============================*/
+
+void print_LW(LW *lw)
+{
+    for (LW *p = lw->next; p; p = p->next)
+    {
+	printf("%s\n", p->word);
+    }
+}
 
 Node* get_node(Pgraph *G, int ind)
 {
@@ -183,6 +210,33 @@ Node* get_node(Pgraph *G, int ind)
 	i++;
     }
     return l->node;
+}
+
+void reinit_word(Pgraph *G)
+{
+    char *s = malloc(G->longest * sizeof(char));
+    Node *node = get_node(G, G->cur_pos);
+    int i = 0;
+    while (node->father != -1)
+    {
+	s[i] = node->value;
+	i++;
+	node = get_node(G, node->father);
+    }
+    
+    //reverse
+    i--;
+    int j = 0;
+    while (i > 0)
+    {
+	G->word->w[j] = s[i];
+	j++;
+	i--;
+    }
+
+    G->word->w[j] = 0;
+    G->word->index = j;
+    free(s);
 }
 
 int list_append(List *list, List *elm)
@@ -203,24 +257,27 @@ void adjlists_insert(Pgraph *G, Adjlists *list, Adjlists *elm, char c)
     list->next = elm;
 }
 
-void LPgraph_append(LPgraph *LG, Pgraph *G)
+void LW_append(LW *lw, char *w)
 {
-    LPgraph *elm = init_LPgraph(G);
-    for (; LG->next; LG = LG->next)
-	continue;
-    elm->next = LG->next;
-    LG->next = elm;
-    elm->prev = LG;
+    LW *elm = init_LW(w);
+    for (; lw->next; lw = lw->next)
+	lw->tail = elm;
+    elm->prev = lw;
+    elm->next = lw->next;
+    lw->next = elm;
+    lw->tail = elm;
 }
 
-void LPgraph_pop(LPgraph *LG)
+void LW_pop(LW *lw)
 {
-    for (; LG->next; LG = LG->next)
-	continue;
-    LG->prev->next = LG->next;
-    LG->prev = NULL;
-    LG->next = NULL;
-    free_LPgraph(LG);
+    LW *p = lw->next;
+    if (p != NULL)
+    {
+        for (; p->next; p = p->next)
+	    lw = lw->next;
+    	lw->next = NULL;
+    	free_LW(p);
+    }
 }
 
 /*==================== Add a word in the Pgraph ===========================*/
@@ -288,25 +345,26 @@ void add_word(Pgraph *G, char *word, size_t size)
 
 Pgraph *create_Pgraph_with_dir(char *cur_dir)
 {
-    printf("OKOK\n");
     Pgraph *G = init_Pgraph();
-    printf("OKOK\n");
     struct dirent *dir;
-    // struct stat buf;
+    struct stat buf;
 
     int len;
     DIR *d = opendir(cur_dir);
 
     if (d)
     {
+	int dir_len = strlen(cur_dir);
 	while ((dir = readdir(d)) != NULL)
 	{
 	    len = strlen(dir->d_name) + 2;
+            char *path = malloc((dir_len + len - 1) * sizeof(char));
 	    char *s = malloc(len * sizeof(char));
-	    //if (s == NULL) errx(1, "fail malloc");
+	    strcpy(path, cur_dir);
+	    strcat(path, dir->d_name);
 	    strcpy(s, dir->d_name);
-	    
-	    /*if (stat(dir->d_name, &buf) == -1)
+	  
+	    if (stat(path, &buf) == -1)
 	    {
 		perror("Error type");
                 errx(1, "%s: Not a file nor a directory", dir->d_name);
@@ -314,27 +372,16 @@ Pgraph *create_Pgraph_with_dir(char *cur_dir)
 	    if (S_ISDIR(buf.st_mode))
 		strcat(s, "/");
 	    else
-	        strcat(s, " ");*/
-	    DIR *tmp;
-	    if ((tmp = opendir(dir->d_name)) == NULL)
-	    {
-		//printf("%s\n", dir->d_name);
-		strcat(s, " ");
-	    }
-	    else
-	    {
-		strcat(s, "/");
-		closedir(tmp);
-	    }
+	        strcat(s, " ");
 	    
             add_word(G, s, len);
 	    G->order += len;
 	    if (G->longest < len)
 		G->longest = len;
+	    free(path);
 	    free(s);
 	}
 	G->word->w = malloc((G->longest + 2) * sizeof(char));
-	//if (G->word->w == NULL) errx(1, "fail malloc");
 	closedir(d);
     }
 

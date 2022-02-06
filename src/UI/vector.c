@@ -37,13 +37,12 @@ void vector_push(struct vector* v, int x)
     v->size++;
 }
 
-int vector_pop(struct vector* v, int* x)
+void vector_pop(struct vector* v)
 {
     if (v->size == 0)
-        return 0;
-    *x = *(v->data + v->size - 1);
+        return;
+    //*x = *(v->data + v->size - 1);
     v->size--;
-    return 1;
 }
 
 int vector_get(struct vector* v, size_t i, int* x)

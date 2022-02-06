@@ -165,7 +165,7 @@ void evaluate_string(UI *ui)
     //==============Eval===============
 
     char *text = get_string(ui);
-    new_line(ui, text, ui->G->word->w);
+    new_line(ui, text, text);
     /*
     if (text[0] != '\0') 
         execute_command(ui, text);
@@ -191,45 +191,55 @@ void _print(GtkButton *button, gpointer user_data)
 }
 */
 
+char* new_path(LW *lw)
+{
+    char *s;
+    size_t len = 0;
+    LW *p;
+    for (p = lw->tail; p->prev && p->word[0] != 0; p = p->prev)
+	len += strlen(p->word);
+
+    s = malloc((len + 1) * sizeof(char));
+    s[0] = 0;
+    p = p->next;
+    for (; p; p = p->next)
+	strcat(s, p->word);
+
+    return s;
+}
+
 void update_auto_completion(UI *ui)
 {
-    ui->G->cur_pos = ui->G->last_pos;
+    ui->Gs->G->cur_pos = ui->Gs->G->last_pos;
 
-    size_t len = strlen(ui->LG->G->word->w);;
-    char *s = malloc(len * sizeof(char));
-    strcpy(s, ui->LG->G->word->w);
-    for (LPgraph *l = ui->LG->next; l; l = l->next)
+    if (ui->Gs->G->word->w[ui->Gs->G->word->index] == ' ')
     {
-	len += strlen(l->G->word->w) + 1;
-	if (realloc(s, len) == NULL)
-	    errx(1, "realloc");
-	strcat(s, l->G->word->w);
+	char *s = malloc(3 * sizeof(char));
+	strcpy(s, "./");
+	LW_append(ui->Gs->lw, s);
+	s = malloc(sizeof(char));
+	s[0] = 0;
+	LW_append(ui->Gs->lw, s);
+	vector_push(ui->Gs->v, ui->Gs->G->last_pos);
+	free_Pgraph(ui->Gs->G);
+	ui->Gs->G = create_Pgraph_with_dir("./");
     }
-
-    if (ui->G->word->w[ui->G->word->index] == ' ')
+    else if (ui->Gs->G->word->w[ui->Gs->G->word->index] == '/')
     {
-	printf("OK\n");
-        Pgraph *G = create_Pgraph_with_dir(".");
-	printf("OK1\n");
-        LPgraph_append(ui->LG, G);
-	printf("OK2\n");
-        ui->G = G;
-        printf("OK3\n");	
+	char *cpy = malloc((ui->Gs->G->word->index + 1) * sizeof(char));
+        strcpy(cpy, ui->Gs->G->word->w);
+        LW_append(ui->Gs->lw, cpy);
+	char* s = new_path(ui->Gs->lw);
+        vector_push(ui->Gs->v, ui->Gs->G->last_pos);
+        free_Pgraph(ui->Gs->G);
+        ui->Gs->G = create_Pgraph_with_dir(s);
+	free(s);
     }
-
-    free(s);
-    // TODO
 }
 
 void auto_completion(UI *ui)
 {
-    ui->buffer = gtk_text_view_get_buffer(ui->text_view);
-    GtkTextIter start = {0,};
-    GtkTextIter end = {0,};
-    char *text = malloc((ui->G->longest + 2) * sizeof(char));
-    gtk_text_buffer_get_start_iter(ui->buffer, &start);
-    gtk_text_buffer_get_end_iter(ui->buffer, &end);
-    text = gtk_text_buffer_get_text(ui->buffer, &start, &end, FALSE);
+    char *text = get_string(ui);
     const char *s = gtk_label_get_text(ui->completion);
     strcat(text, s);
     gtk_text_buffer_set_text(ui->buffer, text, strlen(text));
@@ -237,13 +247,12 @@ void auto_completion(UI *ui)
    
     if (s[0] != '\0')
     {
-        strcat(ui->G->word->w, s);	
-        ui->G->word->index += strlen(s) - 1;
+        strcat(ui->Gs->G->word->w, s);	
+        ui->Gs->G->word->index += strlen(s) - 1;
     }
    
     gtk_label_set_text(ui->completion, ""); 
     update_auto_completion(ui);
-
     free(text);
 }
 
@@ -263,7 +272,18 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
     }
     else if (evt->keyval == GDK_KEY_BackSpace)
     {
-        char *w = get_word(ui->G, '\0');
+	if (ui->Gs->G->cur_pos == 0 && ui->Gs->v->size > 0)
+	{
+	    printf("OK\n");
+	    free_Pgraph(ui->Gs->G);
+	    ui->Gs->G = create_Pgraph_with_dir("./");
+	    ui->Gs->G->cur_pos = *(ui->Gs->v->data + ui->Gs->v->size - 1);
+	    vector_pop(ui->Gs->v);
+	    reinit_word(ui->Gs->G);
+	    printf("%s\n", ui->Gs->G->word->w);
+	}
+	
+        char *w = get_word(ui->Gs->G, '\0');
         gtk_label_set_text(ui->completion, w);
         free(w);
     }
@@ -271,7 +291,7 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
     {
 	if ((char)evt->keyval >= 32 && (char)evt->keyval <= 126)
         {
-            char *w = get_word(ui->G, (char)evt->keyval);
+            char *w = get_word(ui->Gs->G, (char)evt->keyval);
             gtk_label_set_text(ui->completion, w);
             free(w);
         }
@@ -339,13 +359,12 @@ int main(void)
 	.text_view = NULL,
 	.buffer = buffer,
 	.completion = NULL,
-	.LG = NULL,
-	.G = NULL,
+	.Gs = NULL,
 	//.b1 = b1,
     };
 
-    ui.G = create_Pgraph_with_dir(".");
-    ui.LG = init_LPgraph(ui.G);
+    Pgraph *G = create_Pgraph_with_dir("./");
+    ui.Gs = init_Pgraphs(G);
 
     add_line(&ui, 0, "");
 
@@ -356,7 +375,7 @@ int main(void)
     g_signal_connect(window, "key_press_event", G_CALLBACK(on_key_press), &ui);
 
     gtk_main();
-    free_LPgraph(ui.LG);
+    free_Pgraphs(ui.Gs);
 
     return 0;
 }

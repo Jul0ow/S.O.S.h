@@ -8,7 +8,7 @@
 
 int main()
 {
-    Pgraph *G = create_Pgraph_with_dir(".");
+    //Pgraph *G = create_Pgraph_with_dir(".");
     /*print_words(G);
     
     char *w = get_word(G, 'l');
@@ -55,11 +55,13 @@ int main()
 
     printf("%s\n", G->word->w);*/
 
-    LPgraph *LG = init_LPgraph(G);
-    Pgraph *G1 = create_Pgraph_with_dir("../../../S.O.S.h/src/UI/");
-    Pgraph *G2 = create_Pgraph_with_dir("command");
-    Pgraph *G3 = create_Pgraph_with_dir("data");
-    LPgraph_append(LG, G1);
+    //LPgraph *LG = init_LPgraph(G);
+    //Pgraph *G1 = create_Pgraph_with_dir("../../../S.O.S.h/src/UI/");
+    Pgraph *G2 = create_Pgraph_with_dir("command/./");
+    //Pgraph *G3 = create_Pgraph_with_dir("data");
+    print_words(G2);
+    free_Pgraph(G2);
+    /*LPgraph_append(LG, G1);
     LPgraph_append(LG, G2);
     LPgraph_append(LG, G3);
 
@@ -75,8 +77,8 @@ int main()
     {
         printf("=======================\n");
         print_words(l->G);
-    }
+    }*/
 
-    free_LPgraph(LG);
+    //free_LPgraph(LG);
     return 0;
 }

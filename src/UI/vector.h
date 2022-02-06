@@ -44,7 +44,7 @@ void vector_push(struct vector* v, int x);
 //   is removed from the vector, its value is stored in x,
 //   and the function returns true (1).
 // - Otherwise the function returns false (0).
-int vector_pop(struct vector* v, int* x);
+void vector_pop(struct vector* v);
 
 // Get the value at the i index.
 // - If the i index is not out of bound,
