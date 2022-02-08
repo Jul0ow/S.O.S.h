@@ -47,6 +47,7 @@ typedef struct List_word
     struct List_word *prev;
     struct List_word *tail;
     char *word;
+    int is_dir;
 }LW;
 
 typedef struct Pgraphs

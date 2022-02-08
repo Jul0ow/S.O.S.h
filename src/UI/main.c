@@ -196,11 +196,11 @@ char* new_path(LW *lw)
     char *s;
     size_t len = 0;
     LW *p;
-    for (p = lw->tail; p->prev && p->word[0] != 0; p = p->prev)
+    for (p = lw->tail; p->prev && p->is_dir; p = p->prev)
 	len += strlen(p->word);
 
     s = malloc((len + 1) * sizeof(char));
-    s[0] = 0;
+    strcpy(s, "./");
     p = p->next;
     for (; p; p = p->next)
 	strcat(s, p->word);
@@ -208,32 +208,55 @@ char* new_path(LW *lw)
     return s;
 }
 
+void new_graph_space(UI *ui)
+{
+    char *s = malloc(3 * sizeof(char));
+    strcpy(s, "./");
+    LW_append(ui->Gs->lw, s);
+    vector_push(ui->Gs->v, ui->Gs->G->last_pos);
+    free_Pgraph(ui->Gs->G);
+    ui->Gs->G = create_Pgraph_with_dir("./");
+}
+
+void new_graph_dir(UI *ui)
+{
+    char *cpy = malloc((ui->Gs->G->word->index + 1) * sizeof(char));
+    strcpy(cpy, ui->Gs->G->word->w);
+    LW_append(ui->Gs->lw, cpy);
+    ui->Gs->lw->tail->is_dir = 1;
+    char* s = new_path(ui->Gs->lw);
+    vector_push(ui->Gs->v, ui->Gs->G->last_pos);
+    free_Pgraph(ui->Gs->G);
+    ui->Gs->G = create_Pgraph_with_dir(s);
+    free(s);
+}
+
 void update_auto_completion(UI *ui)
 {
     ui->Gs->G->cur_pos = ui->Gs->G->last_pos;
 
-    if (ui->Gs->G->word->w[ui->Gs->G->word->index] == ' ')
+    if (ui->Gs->G->word->w[ui->Gs->G->word->index - 1] == ' ')
     {
-	char *s = malloc(3 * sizeof(char));
+	/*char *s = malloc(3 * sizeof(char));
 	strcpy(s, "./");
-	LW_append(ui->Gs->lw, s);
-	s = malloc(sizeof(char));
-	s[0] = 0;
 	LW_append(ui->Gs->lw, s);
 	vector_push(ui->Gs->v, ui->Gs->G->last_pos);
 	free_Pgraph(ui->Gs->G);
-	ui->Gs->G = create_Pgraph_with_dir("./");
+	ui->Gs->G = create_Pgraph_with_dir("./");*/
+	new_graph_space(ui);
     }
-    else if (ui->Gs->G->word->w[ui->Gs->G->word->index] == '/')
+    else if (ui->Gs->G->word->w[ui->Gs->G->word->index - 1] == '/')
     {
-	char *cpy = malloc((ui->Gs->G->word->index + 1) * sizeof(char));
+	/*char *cpy = malloc((ui->Gs->G->word->index + 1) * sizeof(char));
         strcpy(cpy, ui->Gs->G->word->w);
         LW_append(ui->Gs->lw, cpy);
+	ui->Gs->lw->tail->is_dir = 1;
 	char* s = new_path(ui->Gs->lw);
         vector_push(ui->Gs->v, ui->Gs->G->last_pos);
         free_Pgraph(ui->Gs->G);
         ui->Gs->G = create_Pgraph_with_dir(s);
-	free(s);
+	free(s);*/
+	new_graph_dir(ui);
     }
 }
 
@@ -248,7 +271,7 @@ void auto_completion(UI *ui)
     if (s[0] != '\0')
     {
         strcat(ui->Gs->G->word->w, s);	
-        ui->Gs->G->word->index += strlen(s) - 1;
+        ui->Gs->G->word->index += strlen(s);
     }
    
     gtk_label_set_text(ui->completion, ""); 
@@ -264,6 +287,9 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
     if (evt->keyval == GDK_KEY_Return)
     {
 	evaluate_string(ui);
+	free_Pgraphs(ui->Gs);
+        Pgraph *G = create_Pgraph_with_dir("./");
+        ui->Gs = init_Pgraphs(G);
 	return TRUE;
     }
     else if (evt->keyval == GDK_KEY_Tab)
@@ -272,15 +298,18 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
     }
     else if (evt->keyval == GDK_KEY_BackSpace)
     {
-	if (ui->Gs->G->cur_pos == 0 && ui->Gs->v->size > 0)
+	if (ui->Gs->G->cur_pos == 0 
+			&& ui->Gs->v->size > 0
+			&& ui->Gs->G->over_write == 0)
 	{
-	    printf("OK\n");
 	    free_Pgraph(ui->Gs->G);
-	    ui->Gs->G = create_Pgraph_with_dir("./");
+	    LW_pop(ui->Gs->lw);
+	    char *s = new_path(ui->Gs->lw);
+	    ui->Gs->G = create_Pgraph_with_dir(s);
 	    ui->Gs->G->cur_pos = *(ui->Gs->v->data + ui->Gs->v->size - 1);
 	    vector_pop(ui->Gs->v);
 	    reinit_word(ui->Gs->G);
-	    printf("%s\n", ui->Gs->G->word->w);
+	    free(s);
 	}
 	
         char *w = get_word(ui->Gs->G, '\0');
@@ -293,6 +322,14 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
         {
             char *w = get_word(ui->Gs->G, (char)evt->keyval);
             gtk_label_set_text(ui->completion, w);
+            if ((char)evt->keyval == '/' && ui->Gs->G->over_write == 0)
+	    {
+	        new_graph_dir(ui);
+	    }
+	    else if ((char)evt->keyval == ' ' && w[0] == 0)
+            {
+		new_graph_space(ui);
+	    }
             free(w);
         }
     }

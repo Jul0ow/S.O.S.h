@@ -9,6 +9,9 @@
 
 #include "prefix_graph.h"
 
+void print_words(Pgraph *G);
+void LW_append(LW *lw, char *s);
+
 /*==================== Print ===============================*/
 //Simple DFS
 
@@ -112,6 +115,7 @@ LW *init_LW(char *w)
     lw->prev = NULL;
     lw->tail = lw;
     lw->word = w;
+    lw->is_dir = 0;
     return lw;
 }
 
@@ -121,6 +125,9 @@ Pgraphs *init_Pgraphs(Pgraph *G)
     Gs->G = G;
     Gs->v = vector_new();
     Gs->lw = init_LW(NULL);
+    char *s = malloc(3 * sizeof(char));
+    strcpy(s, "./");
+    LW_append(Gs->lw, s);
     return Gs;
 }
 
@@ -270,13 +277,13 @@ void LW_append(LW *lw, char *w)
 
 void LW_pop(LW *lw)
 {
-    LW *p = lw->next;
-    if (p != NULL)
+    if (lw->tail->prev)
     {
-        for (; p->next; p = p->next)
-	    lw = lw->next;
-    	lw->next = NULL;
-    	free_LW(p);
+	LW *p = lw->tail;
+        lw->tail->prev->next = NULL;
+	for (;lw; lw = lw->next)
+	    lw->tail = p->prev;
+	free_LW(p);
     }
 }
 
