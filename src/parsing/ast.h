@@ -87,6 +87,12 @@ struct node_command
     ast_node *node;
 
     enum cmd cmd;
-}
+};
+
+//argument
+struct node_argument
+{
+    ast_node *node;
+};
 
 #endif
