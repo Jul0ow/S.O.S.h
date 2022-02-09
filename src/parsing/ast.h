@@ -71,7 +71,7 @@ typedef struct ast_node
     } data;
 
     //litteral expression
-    void *expression;
+    void *string;
 
     //first child / right sibling implementation
     ast_node *child = NULL;
