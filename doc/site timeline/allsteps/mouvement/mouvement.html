@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouvement</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <header>
+   <nav>
+       <ul>
+         <li id="logo"><a href="../../../index.html">Below</a></li>
+         <li><a href="../../../MTW/MTW.html">MTW</a></li>
+         <li><a href="../../../telechargement/telechargement.html">Telecharger</a></li>
+           <li><a href="../../../galerie/galerie.html">Galerie</a></li>
+         <li><a href="../../timeline.html">Developpement</a></li>
+       </ul>
+   </nav>
+   <div id="imagePrincipale">
+       <h1>Les Mouvements</h1>
+       <div id="premierTrait"></div>
+       <h4>Déplacements du joueur</h4>
+       <a href="../../timeline.html"><button>Retour</button></a>
+   </div>
+ </header>
+
+ <section class="main" id="example">
+    <div class="content">
+        <div class="card">
+            <div class="left">
+                <h1>Les premiers déplacements</h1>
+                <p>  Les déplacements du personnage-joueur est l'une des première chose dont nous nous sommes occupés, cela a donc été notre première réelle difficulté. L'opération s'est avérée plus facile que prévue mais tout de même un peu longue car nous découvrions en parallèle le fonctionnement d'Unity. Le personnage se déplace dans quatre dimensions, peut courir, sauter et chuter lorsque aucun sol n'est sous ses pieds.</p>
+            </div>
+            <div class="right">
+                <img src="../../../media/screenTimeLine/mouvementScreen1-min.JPG">
+            </div>
+        </div>
+        <div class="card">
+            <div class="left">
+                <h1>Les animations</h1>
+                <p> L'incorporation des animations à notre personnage nous posa, en revanche, plus de soucis. Nous avons donc dû appréhender Animator d'Unity. Les animations de déplacements de base (marche) sont directement liées aux mouvements du RigidBody du personnage, les autres sont activées par des booléens et des transitions. Par exemple, l'animation de chute est déclenchée lorsque (IsJumping || IsGrounded) est faux et fait une transition vers l'animation d'atterrissage lorsque IsGrounded sera vrai à nouveau. Ces booléens sont gérés dans les scripts de mouvements attachés au Prefab du personnage. Cela crée au final l'arbre d'animations tentaculaire que vous pouvez voir ci-joint.</p>
+            </div>
+            <div class="right">
+                <img src="../../../media/screenTimeLine/mouvementScreen2-min.JPG">
+            </div>
+        </div>
+    </div>
+ </section>
+
+</body>
+</html>

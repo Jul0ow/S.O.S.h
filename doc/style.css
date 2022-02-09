@@ -1,0 +1,265 @@
+/*@import url('https://fonts.googleapis.com/css?family=Advent+Pro|Dancing+Script&display=swap');*/
+@import url('https://fonts.googleapis.com/css2?family=Advent+Pro:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Volkhov:wght@700&display=swap');
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Volkhov', serif;
+}
+
+body {
+  font-family: 'Advent Pro', sans-serif;
+  padding: 0;
+  margin: 0;
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style-type: none;
+}
+h2 {
+  text-transform: uppercase;
+  text-align: center;
+  padding-top: 30px;
+  font-size: 2em;
+}
+a {
+  text-decoration: none;
+  color: black;
+}
+/* ******************* NAVBAR ******************* */
+ul {
+  margin: 0;
+  padding: 0;
+}
+li a:hover{
+  color: white;
+}
+li:hover{
+  transform: scale(1.25);
+}
+li {
+  list-style-type: none;
+}
+.a{
+  text-decoration: none;
+  color: black;
+}
+nav {
+  font-family: 'Advent Pro', sans-serif;
+  overflow: hidden;
+  background-color: rgb(0, 0, 0);/*rgb(31, 13, 48);*/
+  position: fixed;
+  width: 100%;
+  opacity: 0.9;
+
+}
+header li {
+  /*font-family: 'Advent Pro', sans-serif;*/
+  float: right;
+  font-size: 1.0em;
+}
+header li a {
+  /*font-family: 'Advent Pro', sans-serif;*/
+  text-decoration: none;
+  font-weight: bold;
+  display: block;
+  text-align: center;
+  padding: 18px 16px;
+  color: rgba(234, 16, 16, 0.79);
+}
+#logo {
+  /*font-family: 'Advent Pro', sans-serif;*/
+  font-weight: bold;
+  float: left;
+  color: rgba(241, 26, 26, 0.79);
+}
+/* **************** IMAGE PRINCIPALE ************* */
+#imagePrincipale {
+  padding-top: 60px;
+  background: url(media/Fond_decran-min.png) no-repeat fixed 50% 50%;
+  background-size: cover;
+  height: 799px;
+}
+h1 {
+  text-align: center;
+  color: rgba(92, 158, 187, 0.79);
+  font-size: 10em;
+  margin-top: 100px;
+  text-shadow: 1px 3px 2px black;
+}
+#premierTrait {
+  height: 10px;
+  width: 25%;
+  margin: -3px auto;
+  background-color: rgba(92, 158, 187, 0.79);
+  box-shadow: 1px 3px 2px black;
+}
+p{
+  font-size: 1.8em;
+}
+h3 {
+  text-align: center;
+  color:rgba(92, 158, 187, 0.79);
+  font-size: 3em;
+  text-shadow: 1px 3px 2px black;
+}
+/* *************** PRESENTATION ********************** */
+#presentation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: rgb(28, 46, 130);
+  padding: 10px 0px 100px 0;
+}
+
+#texteIntro {
+  padding: 0px 20%;
+}
+#prestations {
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 30px 10%;  
+}
+#chevalier{
+  height: 500px;
+  width: 500px;
+}
+
+.imagesPrestations h4 {
+  text-align: center;
+  font-size: 1.8em;
+  margin: 15px;
+  font-weight: 300;
+}
+.imagesPrestations img {
+  border-radius: 10px;
+  box-shadow: 5px 5px 3px 1px rgba(0,0,0,0.7);
+}
+.imagesPrestations img:hover {
+  opacity: 0.5;
+  transform: scale(1.05);
+  transition: 0.6s ease-in-out;
+}
+/* **************** TOURISME ********************** */
+#tourisme {
+  height: 1400px;
+  background-color: rgba(87, 2, 2, 0.795);
+  padding: 1px 2%;
+}
+#tourisme h2 {
+  padding-top: 60px;
+}
+#ocean {
+  background: url('media/Blender_logo_no_text.svg_-min.png') no-repeat 50%;
+  background-size: 150px 150px;
+}
+#chateau {
+  background: url('media/unity-69-logo-png-transparent-min.png') no-repeat 50%;
+  background-size: 150px 150px;
+}
+#phare {
+  background: url('media/Adobe_Illustrator_Logo-min.png') no-repeat 50%;
+  background-size: 150px 150px;
+}
+#vignoble {
+  background: url('media/nav-logo-photon.png') no-repeat 50%;
+  background-size:  225px 78px;
+}
+#tourisme li {
+  margin: 65px 100px 0 100px;
+  height: 226px;
+  width: 55%;
+  max-width: 550px;
+  float: left;
+  box-shadow: 6px 6px 28px -1px rgba(0,0,0,0.75);
+}
+#tourisme p {
+  height: 45px;
+  width: 235px;
+  background-color: rgb(49, 53, 92);
+  float:right;
+  margin: 50px -180px 0 0;
+  font-size: 1.5em;
+  text-align: center;
+  padding-top: 15px;
+  box-shadow: 4px 4px 0 1px rgb(33, 37, 66);
+}
+#tourisme #chateau, #tourisme #vignoble {
+  float: right;
+}
+#chateau p, #vignoble p {
+  float: left;
+  background-color: rgb(66, 49, 92);
+  margin-left: -180px;
+  box-shadow: -4px 4px 0 1px rgb(50, 37, 70);
+}
+/* ******************* FOOTER ******************** */
+footer {
+  background-color: #333333;
+  color: rgba(226, 26, 26, 0.795);;
+  padding: 20px 0 10px 0;
+  text-align: center;
+}
+form {
+  margin: 0 auto;
+  max-width: 900px;
+}
+input, textarea, button {
+  border: none;
+  width: 55%;
+  padding: 15px 10px;
+  margin: 1px 0;
+  font-size: 1.2em;
+  font-family: 'Advent Pro', sans-serif;
+  border-radius: 8px;
+}
+textarea {
+  height: 120px;
+}
+button {
+  font-size: 1.5em;
+  background-color: #c6c2dd;
+}
+button:hover {
+  background-color: #e55039;
+  color: #1a0b72;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+#deuxiemeTrait {
+  height: 2px;
+  width: 90%;
+  background-color: #c6c2dd;
+  margin: 60px auto;
+}
+#copyrightEtIcons {
+  display: flex;
+  margin-bottom: 20px;
+  padding: 0 10%;
+}
+#copyright {
+  width: 50%;
+  text-align: left;
+  color: #c6c2dd;
+}
+#icons {
+  width: 50%;
+  text-align: right;
+}
+#icons a {
+  display: inline-block;
+  padding: 0 15px;
+  font-size: 1.3em;
+  color: #c6c2dd;
+}
+#icons a:hover {
+  transform: scale(1.5);
+  transition: 0.1s;
+}

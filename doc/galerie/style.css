@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Advent+Pro:wght@300&display=swap');
+*, ::before, ::after{
+    box-sizing: border-box;
+    margin:0;
+    padding: 0;
+}
+html{
+    scroll-behavior: smooth;
+}
+/*****************/
+ul {
+    margin: 0;
+    padding: 0;
+}
+li a:hover{
+    color: white;
+}
+li:hover{
+    transform: scale(1.25);
+}
+li {
+    list-style-type: none;
+}
+.a{
+    text-decoration: none;
+    color: black;
+}
+nav {
+    font-family: 'Advent Pro', sans-serif;
+    overflow: hidden;
+    background-color: rgb(0, 0, 0);/*rgb(31, 13, 48);*/
+    position: fixed;
+    width: 100%;
+    opacity: 0.9;
+}
+header li {
+    /*font-family: 'Advent Pro', sans-serif;*/
+    float: right;
+    font-size: 1.0em;
+}
+header li a {
+    /*font-family: 'Advent Pro', sans-serif;*/
+    text-decoration: none;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+    padding: 18px 16px;
+    color: rgba(234, 16, 16, 0.79);
+}
+#logo {
+    /*font-family: 'Advent Pro', sans-serif;*/
+    font-weight: bold;
+    float: left;
+    color: rgba(241, 26, 26, 0.79);
+}
+/********************/
+
+
+body{
+    background: url("../media/couverture.png");
+    background-size: cover;
+    height: 100vh;
+}
+h1{
+    color: #bdbaba;
+    text-align: center;
+    font-size: 75px;
+    font-family: Montserra,sans-serif;
+    padding-top: 100px;
+}
+h2{
+    color: #bdbaba;
+    text-align: center;
+    font-size: 75px;
+    font-family: Montserra,sans-serif;
+    padding-top: 100px;
+}
+.galerie{
+    display:  flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 80%;
+    max-width: 1300px;
+    margin: 70px auto 0;
+    /*padding-bottom: 40px;*/
+    /*background: crimson;*/
+}
+.item {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    width: 240px;
+    height: 160px;
+    margin-bottom: 110px;
+    margin-left: 0.5em;
+    /*overflow: hidden;*/
+    flex-shrink: 0;
+}
+.item button:hover{
+    transform: scale(1.15);
+    background-color: #c25151;
+}
+.item button{
+    width: 100%;
+    /*justify-content: center;*/
+    padding: 5px 15px;
+    background-color: #b4b2b2;
+    color: black;
+    border: none;
+    cursor: pointer;
+}
+.item .button a{
+
+}
+
+.item img {
+    width: 90%;
+    height: auto;
+}
