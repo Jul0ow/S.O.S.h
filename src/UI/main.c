@@ -237,25 +237,10 @@ void update_auto_completion(UI *ui)
 
     if (ui->Gs->G->word->w[ui->Gs->G->word->index - 1] == ' ')
     {
-	/*char *s = malloc(3 * sizeof(char));
-	strcpy(s, "./");
-	LW_append(ui->Gs->lw, s);
-	vector_push(ui->Gs->v, ui->Gs->G->last_pos);
-	free_Pgraph(ui->Gs->G);
-	ui->Gs->G = create_Pgraph_with_dir("./");*/
 	new_graph_space(ui);
     }
     else if (ui->Gs->G->word->w[ui->Gs->G->word->index - 1] == '/')
     {
-	/*char *cpy = malloc((ui->Gs->G->word->index + 1) * sizeof(char));
-        strcpy(cpy, ui->Gs->G->word->w);
-        LW_append(ui->Gs->lw, cpy);
-	ui->Gs->lw->tail->is_dir = 1;
-	char* s = new_path(ui->Gs->lw);
-        vector_push(ui->Gs->v, ui->Gs->G->last_pos);
-        free_Pgraph(ui->Gs->G);
-        ui->Gs->G = create_Pgraph_with_dir(s);
-	free(s);*/
 	new_graph_dir(ui);
     }
 }
@@ -323,13 +308,9 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
             char *w = get_word(ui->Gs->G, (char)evt->keyval);
             gtk_label_set_text(ui->completion, w);
             if ((char)evt->keyval == '/' && ui->Gs->G->over_write == 0)
-	    {
 	        new_graph_dir(ui);
-	    }
 	    else if ((char)evt->keyval == ' ' && w[0] == 0)
-            {
 		new_graph_space(ui);
-	    }
             free(w);
         }
     }
@@ -365,6 +346,33 @@ void createGrid(GtkWidget **grid, GtkWidget **contain, const gchar *name)
     gtk_container_add (GTK_CONTAINER (*contain), *grid);
 }
 
+/*
+void loading_animation(GtkWindow *w, GtkImage *anim)
+{
+    GdkPixbufAnimation *pixbuf = 
+	    gdk_pixbuf_animation_new_from_file("animation.gif", NULL);
+    gtk_image_set_from_animation(anim, pixbuf);
+    gtk_widget_show(GTK_WIDGET(w));
+    //sleep(5);
+    //gtk_window_close(w);
+}
+
+void SOSH_quit(GtkWindow *w, gpointer user_data)
+{
+    w = w;
+    UI *ui = user_data;
+    free_Pgraphs(ui->Gs);
+    gtk_main_quit();
+}
+*/
+
+void __show(GtkWidget *w, gpointer user_data)
+{
+    w = w;
+    user_data = user_data;
+    g_print("OK\n");
+}
+
 int main(void)
 {
     gtk_init(NULL, NULL);
@@ -377,8 +385,13 @@ int main(void)
     {
         g_printerr("Error loading file: %s\n", error->message);
         g_clear_error(&error);
-        return 1;
+        errx(EXIT_FAILURE, "Load fail");
     }
+
+    /*GtkWindow* w = GTK_WINDOW(gtk_builder_get_object(builder, "Loader"));
+    GtkImage *anim = GTK_IMAGE(gtk_builder_get_object(builder, "Animation"));
+
+    loading_animation(w, anim);*/
 
     GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder, "Main_window"));
     GtkTextBuffer* buffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "Text_buffer"));
@@ -404,15 +417,48 @@ int main(void)
     ui.Gs = init_Pgraphs(G);
 
     add_line(&ui, 0, "");
-
-    gtk_widget_show_all(GTK_WIDGET(ui.window));
     
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     //g_signal_connect(b1, "clicked", G_CALLBACK(_print), &ui);
     g_signal_connect(window, "key_press_event", G_CALLBACK(on_key_press), &ui);
+    g_signal_connect(window, "show", G_CALLBACK(__show), NULL);
+
+    gtk_widget_show_all(GTK_WIDGET(ui.window));
 
     gtk_main();
     free_Pgraphs(ui.Gs);
 
     return 0;
 }
+
+/*
+void end_load(GtkWindow *w, gpointer user_data)
+{
+    user_data = user_data;
+    gtk_window_close(w);
+    SOSh();
+}
+
+int main(void)
+{
+    gtk_init(NULL, NULL);
+    GtkBuilder* builder = gtk_builder_new();
+    GError* error = NULL;
+    if (gtk_builder_add_from_file(builder, "data/loader.glade", &error) == 0)
+    {
+        g_printerr("Error loading file: %s\n", error->message);
+        g_clear_error(&error);
+        return 1;
+    }
+
+    GtkWindow* w = GTK_WINDOW(gtk_builder_get_object(builder, "Loader"));
+    GtkImage *anim = GTK_IMAGE(gtk_builder_get_object(builder, "Animation"));
+
+    loading_animation(w, anim);
+
+    g_signal_connect(w, "destroy", G_CALLBACK(end_load), NULL);
+
+    gtk_main();
+
+    return 0;
+}*/
