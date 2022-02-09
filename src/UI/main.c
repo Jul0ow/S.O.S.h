@@ -421,7 +421,7 @@ int main(void)
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     //g_signal_connect(b1, "clicked", G_CALLBACK(_print), &ui);
     g_signal_connect(window, "key_press_event", G_CALLBACK(on_key_press), &ui);
-    g_signal_connect(window, "show", G_CALLBACK(__show), NULL);
+    //g_signal_connect(window, "show", G_CALLBACK(__show), NULL);
 
     gtk_widget_show_all(GTK_WIDGET(ui.window));
 
