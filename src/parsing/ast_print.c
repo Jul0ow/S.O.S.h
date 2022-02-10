@@ -17,15 +17,15 @@ int __printast(*ast_node ast,size_t i)
     }
     printf("%s\n",ast->expression);
     int err = 0;
-    if(ast->sibling != NULL)
-    {
-	err = __printast(ast->sibling,i);
-    }
-    if(err != 0)
-	return err;
     if(ast->child!=NULL)
     {
 	err = __printast(ast->child,i+1);
+    }
+    if(err != 0)
+	return err;
+    if(ast->sibling != NULL)
+    {
+	err = __printast(ast->sibling,i);
     }
     return err;
 }
