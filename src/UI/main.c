@@ -1,5 +1,8 @@
 #include "user_interface.h"
 
+//===================================================================
+// Functions for create a new line in the shell
+
 char* get_dir()
 {
     char *s = malloc(SIZE * sizeof(char));
@@ -11,7 +14,9 @@ char* get_dir()
 char* set_fore_color()
 {
     const char *str = "S.O.Sh@S.O.Sh-Project-S4";
-    const char *format = "<b><span foreground='#FF00DC'>%s</span><span foreground='white'>:</span><span foreground='#C7BF00'>%s</span><span foreground='white'>$   </span></b>";
+    const char *format = "<b><span foreground='#FF00DC'>%s</span>"
+	"<span foreground='white'>:</span><span foreground='#C7BF00'>%s</span>"
+	"<span foreground='white'>$   </span></b>";
     char *markup;
     char* s = get_dir();
     markup = g_markup_printf_escaped(format, str, s);
@@ -63,7 +68,6 @@ void add_line(UI *ui, int is_label, char *text)
         gtk_grid_attach(GTK_GRID(sub_grid), lab, 0, 0, 1, 1);
         gtk_grid_attach(GTK_GRID(sub_grid), tv, 1, 0, 1, 1);
         
-	
 	GtkWidget *completion = gtk_label_new("");
 	gtk_widget_set_name(completion, "completion");
         gtk_grid_attach(GTK_GRID(sub_grid), completion, 2, 0, 1, 1);
@@ -91,8 +95,42 @@ void new_line(UI *ui, char *text, char *output)
     add_line(ui, 0, "");
 }
 
+//===================================================================
+// Functions to execute some commands
+
+int my_parse(UI* ui, char* buf, Args* args)
+{
+    ui = ui;
+    size_t i = 0;
+    size_t len = 0;
+
+    char *ptr;
+    while ((ptr = my_str_split(buf, ' ', &i)) != NULL && len < args->len)
+    {
+        args->args[len] = ptr;
+        len++;
+    }
+
+    args->args[args->len - 1] = (char *)NULL;
+
+    if (!valid_command(args->args[0]))
+    {
+	printf("%s: Invalid command\n", args->args[0]);
+	return -1;
+    }
+
+    // TODO memory leak I think not sure
+    char *s = malloc((strlen(args->args[0]) + 9) * sizeof(char));
+    strcpy(s, "command/");
+    strcat(s, args->args[0]);
+    args->command = s;
+    
+    return 0;
+}
+
 void execute_command(UI *ui, char* text)
 {
+    Args* args = init_args(text);
     int p[2];
     if (pipe(p) == -1)
 	errx(1, "Pipe fails");
@@ -109,14 +147,31 @@ void execute_command(UI *ui, char* text)
 	    errx(1, "Dup fails");
         close(p[1]);
         close(p[0]);
-        char *const args[] = {"command/ls", NULL};
-        execv("command/ls", args);
+	
+	if (my_parse(ui, text, args) == -1)
+	{
+	    exit(EXIT_SUCCESS);
+	}
+	else if (execv(args->command, args->args) == -1)
+	    printf("%s: An error occurs\n", args->args[0]);
+
+	exit(EXIT_SUCCESS);
+
+	//char* args[] = {"command/ls", NULL};
+        /*char **args = malloc(2 * sizeof(char*));
+	char *s = malloc(SIZE * sizeof(char));
+	strcpy(s, "command/ls");
+	*args = s;
+	*(args + 1) = (char*) NULL;*/
+        //execv("command/ls", args);
     }
     else
     {
         if (wait(NULL) == -1)
             errx(1, "The wait function failed");
         close(p[1]);
+
+	//free_args(args);
 
 	remove_line(ui);
         add_line(ui, 2, text);
@@ -165,13 +220,13 @@ void evaluate_string(UI *ui)
     //==============Eval===============
 
     char *text = get_string(ui);
-    new_line(ui, text, text);
-    /*
+    //new_line(ui, text, text);
+
     if (text[0] != '\0') 
         execute_command(ui, text);
     else
 	new_line(ui, text, "");
-    */
+    
     free(text);
 }
 
@@ -190,6 +245,9 @@ void _print(GtkButton *button, gpointer user_data)
     }
 }
 */
+
+//===================================================================
+// Auto-completion functions
 
 char* new_path(LW *lw)
 {
@@ -264,6 +322,7 @@ void auto_completion(UI *ui)
     free(text);
 }
 
+// gets the key press
 gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
 {
     widget = widget;
@@ -318,6 +377,9 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
     return FALSE;
 }
 
+//===================================================================
+// Main functions (init and display the shell)
+
 void myCSS(void)
 {
     GtkCssProvider *provider;
@@ -346,33 +408,6 @@ void createGrid(GtkWidget **grid, GtkWidget **contain, const gchar *name)
     gtk_container_add (GTK_CONTAINER (*contain), *grid);
 }
 
-/*
-void loading_animation(GtkWindow *w, GtkImage *anim)
-{
-    GdkPixbufAnimation *pixbuf = 
-	    gdk_pixbuf_animation_new_from_file("animation.gif", NULL);
-    gtk_image_set_from_animation(anim, pixbuf);
-    gtk_widget_show(GTK_WIDGET(w));
-    //sleep(5);
-    //gtk_window_close(w);
-}
-
-void SOSH_quit(GtkWindow *w, gpointer user_data)
-{
-    w = w;
-    UI *ui = user_data;
-    free_Pgraphs(ui->Gs);
-    gtk_main_quit();
-}
-*/
-
-void __show(GtkWidget *w, gpointer user_data)
-{
-    w = w;
-    user_data = user_data;
-    g_print("OK\n");
-}
-
 int main(void)
 {
     gtk_init(NULL, NULL);
@@ -387,11 +422,6 @@ int main(void)
         g_clear_error(&error);
         errx(EXIT_FAILURE, "Load fail");
     }
-
-    /*GtkWindow* w = GTK_WINDOW(gtk_builder_get_object(builder, "Loader"));
-    GtkImage *anim = GTK_IMAGE(gtk_builder_get_object(builder, "Animation"));
-
-    loading_animation(w, anim);*/
 
     GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder, "Main_window"));
     GtkTextBuffer* buffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "Text_buffer"));
@@ -421,7 +451,6 @@ int main(void)
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     //g_signal_connect(b1, "clicked", G_CALLBACK(_print), &ui);
     g_signal_connect(window, "key_press_event", G_CALLBACK(on_key_press), &ui);
-    //g_signal_connect(window, "show", G_CALLBACK(__show), NULL);
 
     gtk_widget_show_all(GTK_WIDGET(ui.window));
 
@@ -431,12 +460,20 @@ int main(void)
     return 0;
 }
 
+// Test for thread (does not work)
 /*
-void end_load(GtkWindow *w, gpointer user_data)
+void* __sleep(void* arg)
 {
-    user_data = user_data;
-    gtk_window_close(w);
-    SOSh();
+    sleep(1);
+    Loader* load = arg;
+    GdkPixbufAnimation *pixbuf =
+	    gdk_pixbuf_animation_new_from_file("animation.gif", NULL);
+    printf("OK\n");
+    gtk_image_set_from_animation(load->anim, pixbuf);
+    gtk_widget_show(GTK_WIDGET(load->w));
+    sleep(5);
+    gtk_window_close(load->w);
+    return NULL;
 }
 
 int main(void)
@@ -450,15 +487,29 @@ int main(void)
         g_clear_error(&error);
         return 1;
     }
-
+   
+    printf("OK\n"); 
     GtkWindow* w = GTK_WINDOW(gtk_builder_get_object(builder, "Loader"));
     GtkImage *anim = GTK_IMAGE(gtk_builder_get_object(builder, "Animation"));
+   
+    Loader load;
+    load.w = w;
+    load.anim = anim;
 
-    loading_animation(w, anim);
+    printf("OK1\n");
+    pthread_t thr;
+    int e = pthread_create(&thr, NULL, __sleep, &load);
+    if (e != 0)
+	errx(1, "pthread fail to create");
 
-    g_signal_connect(w, "destroy", G_CALLBACK(end_load), NULL);
+    pthread_detach(thr);
+
+    printf("OK2\n");
+    g_signal_connect(w, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     gtk_main();
 
+    printf("finishi\n");
     return 0;
-}*/
+}
+*/

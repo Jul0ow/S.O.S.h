@@ -9,10 +9,18 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <pthread.h>
 
 #include "prefix_graph.h"
+#include "my_parse.h"
 
 #define SIZE 264
+
+typedef struct Loader
+{
+    GtkWindow* w;
+    GtkImage* anim;
+}Loader;
 
 typedef struct UserInterface
 {
