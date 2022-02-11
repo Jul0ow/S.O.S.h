@@ -16,6 +16,8 @@ typedef struct ast_node
     //type of node (~= token)
     enum node_type
     {
+        //Head node
+        NODE_HEAD,
         //Commands etc...
         NODE_COMMAND,
         NODE_ARGUMENT,
@@ -75,6 +77,9 @@ typedef struct ast_node
     void *string;
 
     //first child / right sibling implementation
+    
+    size_t nb_child = 0;
+
     ast_node *child = NULL;
 
     ast_node *sibling = NULL;
