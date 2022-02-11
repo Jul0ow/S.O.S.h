@@ -28,7 +28,7 @@ int isSeparator(char c)
 //In a way to deal with quote
 listT* init_lexing(char *entry)
 {
-    listT *token_list = Xmalloc(sizeof(listT));
+    listT *token_list = xmalloc(sizeof(listT));
     list_init(token_list);
 
     lexing(entry, token_list, '\0');
@@ -54,7 +54,7 @@ size_t read_word(char *p, int isCommand, listT *token_list)
         //initializing the vector containing the string and its length
         vectorS *v = vector_newS();
         //initializing the token that will be returned
-        token *new = Xmalloc(sizeof(token));
+        token *new = xmalloc(sizeof(token));
 
         if(isCommand)
             new->type = COMMAND;
@@ -66,7 +66,7 @@ size_t read_word(char *p, int isCommand, listT *token_list)
 
         vector_pushS(v, '\0');
 
-        new->string = Xmalloc(v->size*sizeof(char));
+        new->string = xmalloc(v->size*sizeof(char));
 
         strcpy(new->string, v->string);
 
@@ -82,7 +82,7 @@ size_t read_word(char *p, int isCommand, listT *token_list)
 
 int read_separator(char *p, listT *token_list)
 {
-    token *t = Xmalloc(sizeof(token));
+    token *t = xmalloc(sizeof(token));
     t->len = (size_t)1;
     switch (*p)
     {

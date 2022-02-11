@@ -3,7 +3,7 @@
 #include <errno.h>
 #include "xmalloc.h"
 
-void * Xmalloc(size_t mem)
+void * xmalloc(size_t mem)
 {
     void *res = malloc(mem);
     if (res == NULL)
@@ -11,7 +11,7 @@ void * Xmalloc(size_t mem)
     return res;
 }
 
-void * Xcalloc(size_t num, size_t bytePerType)
+void * xcalloc(size_t num, size_t bytePerType)
 {
     void *res = calloc(num, bytePerType);
     if (res == NULL)
@@ -19,7 +19,7 @@ void * Xcalloc(size_t num, size_t bytePerType)
     return res;
 }
 
-void * Xrealloc(void * pointer, size_t mem)
+void * xrealloc(void * pointer, size_t mem)
 {
     pointer = realloc(pointer, mem);
     if(pointer == NULL)

@@ -5,10 +5,10 @@
 
 vectorS *vector_newS()
 {
-    vectorS * res = Xmalloc(sizeof(vectorS));
+    vectorS * res = xmalloc(sizeof(vectorS));
     if(res == NULL)
         errx(1, "Not enough memory!\n");
-    res->string = Xmalloc(sizeof(char));
+    res->string = xmalloc(sizeof(char));
     if(res->string == NULL)
         errx(1, "Not enough memory!\n");
     res->capacity = 1;
@@ -24,7 +24,7 @@ void vector_freeS(vectorS *v)
 
 void double_capacityS(vectorS *v)
 {
-    v->string = Xrealloc(v->string, v->capacity*2 * sizeof(char));
+    v->string = xrealloc(v->string, v->capacity*2 * sizeof(char));
     if(v->string == NULL)
         errx(1, "Not enough memory!\n");
     v->capacity *=2;

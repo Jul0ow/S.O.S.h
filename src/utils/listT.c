@@ -44,7 +44,7 @@ size_t list_lenT(listT *list)
 
 void list_push_endT(listT *list, token *t)
 {
-    list_elm *elm = Xmalloc(sizeof(list_elm));
+    list_elm *elm = xmalloc(sizeof(list_elm));
     elm->token = t;
     elm->next = NULL;
     if (list->head == NULL)
@@ -61,7 +61,7 @@ void list_push_endT(listT *list, token *t)
 
 void list_push_frontT(listT *list, token *t)
 {
-    list_elm *elm = Xmalloc(sizeof(list_elm));
+    list_elm *elm = xmalloc(sizeof(list_elm));
     elm->token = t;
     if (list->head == NULL)
         list->tail = elm;
