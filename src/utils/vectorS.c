@@ -1,14 +1,14 @@
 #include <err.h>
-#include "vector.h"
+#include "vectorS.h"
 #include <stdio.h>
 #include "xmalloc.h"
 
-vector *vector_new()
+vectorS *vector_newS()
 {
-    vector * res = xmalloc(sizeof(vector));
+    vectorS * res = Xmalloc(sizeof(vectorS));
     if(res == NULL)
         errx(1, "Not enough memory!\n");
-    res->string = xmalloc(sizeof(char));
+    res->string = Xmalloc(sizeof(char));
     if(res->string == NULL)
         errx(1, "Not enough memory!\n");
     res->capacity = 1;
@@ -16,29 +16,29 @@ vector *vector_new()
     return res;
 }
 
-void vector_free(vector *v)
+void vector_freeS(vectorS *v)
 {
     free(v->string);
     free(v);
 }
 
-void double_capacity(vector *v)
+void double_capacityS(vectorS *v)
 {
-    v->string = xrealloc(v->string, v->capacity*2 * sizeof(char));
+    v->string = Xrealloc(v->string, v->capacity*2 * sizeof(char));
     if(v->string == NULL)
         errx(1, "Not enough memory!\n");
     v->capacity *=2;
 }
 
-void vector_push(vector *v, char x)
+void vector_pushS(vectorS *v, char x)
 {
     if(v->capacity == v->size)
-        double_capacity(v);
+        double_capacityS(v);
     v->string[v->size] = x;
     v->size++;
 }
 
-int vector_pop(vector *v, char *x)
+int vector_popS(vectorS *v, char *x)
 {
     if(v->size == 0)
         return 0;
@@ -46,7 +46,7 @@ int vector_pop(vector *v, char *x)
     return 1;
 }
 
-int vector_get(vector *v, size_t i, char *x)
+int vector_getS(vectorS *v, size_t i, char *x)
 {
     if(i < v->size)
     {
@@ -56,12 +56,12 @@ int vector_get(vector *v, size_t i, char *x)
     return 0;
 }
 
-void vector_insert(vector *v, size_t i, char x)
+void vector_insertS(vectorS *v, size_t i, char x)
 {
     if(i <= v->size)
     {
         if(i == v->capacity)
-            double_capacity(v);
+            double_capacityS(v);
         while(i < v->size)
         {
             char tmp = v->string[i];
@@ -73,7 +73,7 @@ void vector_insert(vector *v, size_t i, char x)
     }
 }
 
-int vector_remove(vector *v, size_t i, char *x)
+int vector_removeS(vectorS *v, size_t i, char *x)
 {
     if(i < v->size)
     {

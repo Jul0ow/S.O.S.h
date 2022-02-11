@@ -6,7 +6,7 @@
 #define TRUE 1
 #define FALSE 0
 
-int compareList(list *l1, list *l2)
+int compareList(listT *l1, listT *l2)
 {
     list_elm *p1= l1->head, *p2 = l2->head;
 
@@ -34,7 +34,7 @@ int compareList(list *l1, list *l2)
     return p1 == p2;
 }
 
-void freeL(list *l, int rToken)
+void freeL1(listT *l, int rToken)
 {
     list_elm *elm = l->head;
     while(elm != NULL)
@@ -55,8 +55,8 @@ void freeL(list *l, int rToken)
 Test(SOSH,simpleLexing)
 {
     cr_log_info("Starting simple lexing example...");
-    list echo1;
-    list_init(&echo1);
+    listT echo1;
+    list_initT(&echo1);
     token c1 = {
             COMMAND,
             "echo",
@@ -69,13 +69,13 @@ Test(SOSH,simpleLexing)
             7
     };
 
-    list_push_end(&echo1, &c1);
-    list_push_end(&echo1, &c2);
-    list* l = init_lexing("echo bonjour");
+    list_push_endT(&echo1, &c1);
+    list_push_endT(&echo1, &c2);
+    listT* l = init_lexing("echo bonjour");
     cr_expect(compareList(l, &echo1) == 1, 
             "trying to parse \"echo bonjour\"");
-    freeL(l, TRUE);
-    freeL(&echo1, FALSE);
+    freeL1(l, TRUE);
+    freeL1(&echo1, FALSE);
     free(l);
 }
 
@@ -209,32 +209,32 @@ Test(SOSH, separator)
             1
     };
 
-    list_push_end(&echo1, &c1); //echo
-    list_push_end(&echo1, &c2); //oui
-    list_push_end(&echo1, &c3); //;
-    list_push_end(&echo1, &c19); //,
-    list_push_end(&echo1, &c5);//&
-    list_push_end(&echo1, &c20);//,
-    list_push_end(&echo1, &c4);//&&
-    list_push_end(&echo1, &c6);//|
-    list_push_end(&echo1, &c21);//,
-    list_push_end(&echo1, &c7);//||
-    list_push_end(&echo1, &c8);//\'
-    list_push_end(&echo1, &c9);//\"
-    list_push_end(&echo1, &c10);//\`
-    list_push_end(&echo1, &c12);//<<
-    list_push_end(&echo1, &c22);//,
-    list_push_end(&echo1, &c13);//>>
-    list_push_end(&echo1, &c23);//,
-    list_push_end(&echo1, &c14);//<
-    list_push_end(&echo1, &c24);//,
-    list_push_end(&echo1, &c15);//>
-    list_push_end(&echo1, &c16);//(
-    list_push_end(&echo1, &c25);//,
-    list_push_end(&echo1, &c17);//)
-    list_push_end(&echo1, &c18);//#
+    list_push_endT(&echo1, &c1); //echo
+    list_push_endT(&echo1, &c2); //oui
+    list_push_endT(&echo1, &c3); //;
+    list_push_endT(&echo1, &c19); //,
+    list_push_endT(&echo1, &c5);//&
+    list_push_endT(&echo1, &c20);//,
+    list_push_endT(&echo1, &c4);//&&
+    list_push_endT(&echo1, &c6);//|
+    list_push_endT(&echo1, &c21);//,
+    list_push_endT(&echo1, &c7);//||
+    list_push_endT(&echo1, &c8);//\'
+    list_push_endT(&echo1, &c9);//\"
+    list_push_endT(&echo1, &c10);//\`
+    list_push_endT(&echo1, &c12);//<<
+    list_push_endT(&echo1, &c22);//,
+    list_push_endT(&echo1, &c13);//>>
+    list_push_endT(&echo1, &c23);//,
+    list_push_endT(&echo1, &c14);//<
+    list_push_endT(&echo1, &c24);//,
+    list_push_endT(&echo1, &c15);//>
+    list_push_endT(&echo1, &c16);//(
+    list_push_endT(&echo1, &c25);//,
+    list_push_endT(&echo1, &c17);//)
+    list_push_endT(&echo1, &c18);//#
     
-    list* l = init_lexing("alors oui;,&,&&|,||\'\"`<<,>>,<,>(,)#");
+    listT* l = init_lexing("alors oui;,&,&&|,||\'\"`<<,>>,<,>(,)#");
     cr_assert(compareList(l, &echo1) == 1, "Trying to parse separator");
     freeL(l, TRUE);
     freeL(&echo1, FALSE);

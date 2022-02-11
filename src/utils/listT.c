@@ -1,21 +1,36 @@
 #include <stdlib.h>
-#include "list.h"
+#include "listT.h"
 #include "lexer.h"
 #include "xmalloc.h"
 
 
-void list_init(list *list)
+void freeL(listT *l)
+{
+    list_elm *elm = l->head;
+    while(elm != NULL)
+    {
+        list_elm *next = elm->next;
+        if(elm->token->type == COMMAND || elm->token->type == ARGUMENT)
+            free(elm->token->string);
+        free(elm->token);
+        
+        free(elm);
+        elm = next;
+    }
+    free(l);
+}
+void list_init(listT *list)
 {
     list->head = NULL;
     list->tail = NULL;
 }
 
-int list_is_empty(list *list)
+int list_is_emptyT(listT *list)
 {
     return list->head == NULL;
 }
 
-size_t list_len(list *list)
+size_t list_lenT(listT *list)
 {
     list_elm *p = list->head;
     size_t acc = 0;
@@ -27,9 +42,9 @@ size_t list_len(list *list)
     return acc+1;
 }
 
-void list_push_end(list *list, token *t)
+void list_push_endT(listT *list, token *t)
 {
-    list_elm *elm = xmalloc(sizeof(list_elm));
+    list_elm *elm = Xmalloc(sizeof(list_elm));
     elm->token = t;
     elm->next = NULL;
     if (list->head == NULL)
@@ -44,9 +59,9 @@ void list_push_end(list *list, token *t)
     }
 }
 
-void list_push_front(list *list, token *t)
+void list_push_frontT(listT *list, token *t)
 {
-    list_elm *elm = xmalloc(sizeof(list_elm));
+    list_elm *elm = Xmalloc(sizeof(list_elm));
     elm->token = t;
     if (list->head == NULL)
         list->tail = elm;
@@ -54,7 +69,7 @@ void list_push_front(list *list, token *t)
     list->head = elm;
 }
 
-token *list_pop_front(list *list)
+token *list_pop_frontT(listT *list)
 {
     list_elm *toPop = list->head;
     if(toPop != NULL)
@@ -69,7 +84,7 @@ token *list_pop_front(list *list)
     return t;
 }
 
-list_elm *list_find(list *list, token *token)
+list_elm *list_findT(listT *list, token *token)
 {
     list_elm *p = list->head;
     while(p != NULL)
@@ -82,7 +97,7 @@ list_elm *list_find(list *list, token *token)
 }
 
 
-void list_rev(list *list)
+void list_revT(listT *list)
 {
     list_elm *current = list->head, *prev = NULL, *next = NULL;
     list->tail = list->head;

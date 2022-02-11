@@ -2,10 +2,10 @@
 #define XMALLOC_H
 #include <stdlib.h>
 
-void *xmalloc(size_t mem);
+void *Xmalloc(size_t mem);
 
-void *xcalloc(size_t num, size_t bytePerType);
+void *Xcalloc(size_t num, size_t bytePerType);
 
-void *xrealloc(void * pointer, size_t mem);
+void *Xrealloc(void * pointer, size_t mem);
 
 #endif

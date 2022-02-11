@@ -1,11 +1,11 @@
 #ifndef LEXER_H
 #define LEXER_H
-#include "vector.h"
+#include "vectorS.h"
 #include "list.h"
 #define TRUE 1
 #define FALSE 0
 
-typedef struct list list;
+typedef struct listT listT;
 typedef struct list_elm list_elm;
 
 
@@ -40,17 +40,17 @@ typedef struct token
     size_t len;
 } token;
 
-list* init_lexing(char *entry);
+listT* init_lexing(char *entry);
 
 //Main function which go throught the string and return a linked list of token
-void lexing(char *entry, list* token, char end);
+void lexing(char *entry, listT* token, char end);
 
 int isSeparator(char c);
 
 //Function which create the next token
-size_t read_word(char *p, int isCommand, list *token_list);
+size_t read_word(char *p, int isCommand, listT *token_list);
 
-int read_separator(char *p, list *token_list);
+int read_separator(char *p, listT *token_list);
 
 //Return TRUE if the char is a Separator
 int isSeparator(char c);

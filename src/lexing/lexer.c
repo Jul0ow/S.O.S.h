@@ -1,5 +1,5 @@
-#include "list.h"
-#include "vector.h"
+#include "listT.h"
+#include "vectorS.h"
 #include "lexer.h"
 #include "xmalloc.h"
 #include <string.h>
@@ -26,9 +26,9 @@ int isSeparator(char c)
 
 //We split the initializing and the lexing to be able to apply recursively the second one
 //In a way to deal with quote
-list* init_lexing(char *entry)
+listT* init_lexing(char *entry)
 {
-    list *token_list = xmalloc(sizeof(list));
+    listT *token_list = Xmalloc(sizeof(listT));
     list_init(token_list);
 
     lexing(entry, token_list, '\0');
@@ -38,23 +38,23 @@ list* init_lexing(char *entry)
 
 //First function to be called, only once and always the function
 //can be called in ` quote
-size_t read_word(char *p, int isCommand, list *token_list) 
+size_t read_word(char *p, int isCommand, listT *token_list) 
 {
     if (isSeparator(*p))
     {
         int res = read_separator(p, token_list);
         if (res)
             return token_list->tail->token->len;
-        else
+        else //only space
             return 1;
         
     }
     else
     {
         //initializing the vector containing the string and its length
-        vector *v = vector_new();
+        vectorS *v = vector_newS();
         //initializing the token that will be returned
-        token *new = xmalloc(sizeof(token));
+        token *new = Xmalloc(sizeof(token));
 
         if(isCommand)
             new->type = COMMAND;
@@ -62,27 +62,27 @@ size_t read_word(char *p, int isCommand, list *token_list)
             new->type = ARGUMENT;
 
         while (!isSeparator(*p))
-            vector_push(v, *(p++));
+            vector_pushS(v, *(p++));
 
-        vector_push(v, '\0');
+        vector_pushS(v, '\0');
 
-        new->string = xmalloc(v->size*sizeof(char));
+        new->string = Xmalloc(v->size*sizeof(char));
 
         strcpy(new->string, v->string);
 
         new->len = v->size-1;
 
-        vector_free(v);
+        vector_freeS(v);
 
-        list_push_end(token_list, new);
+        list_push_endT(token_list, new);
         
         return new->len;
     }
 }
 
-int read_separator(char *p, list *token_list)
+int read_separator(char *p, listT *token_list)
 {
-    token *t = xmalloc(sizeof(token));
+    token *t = Xmalloc(sizeof(token));
     t->len = (size_t)1;
     switch (*p)
     {
@@ -165,15 +165,15 @@ int read_separator(char *p, list *token_list)
             free(t);
             return FALSE;
     }
-    list_push_end(token_list, t);
+    list_push_endT(token_list, t);
     return TRUE;
 }
 
-void lexing(char *entry, list* token_list, char end)
+void lexing(char *entry, listT* token_list, char end)
 {
 
     char *p = entry;
-
+    
     //if we are not bewteen simple or double quotes we do not use space
     if (end != '\'' && end != '"') 
         while (*p != end && *p == ' ')
