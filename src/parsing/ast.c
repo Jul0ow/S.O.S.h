@@ -11,17 +11,34 @@ ast_node creating_ast(list* list)
     ast_node* current = &first;
     current.type = NODE_HEAD;
     list_elm* p = list->head;
+    int is_backtick = 0;
     while(p!=NULL)
     {
         token t = p->token;
+        if (t.type == COMMENT)
+        {
+            p = p->next;
+            continue;
+        }
+        else if (t.type == BACKTICK && is_backtick == 1)
+        {
+            is_backtick = 0;
+            while (*current.type != NODE_BACKTICK)
+            {
+                current = *current->father;
+            }
+            p = p->next;
+        }
         ast_node new = calloc(sizeof(ast_node),1);
         new->string = t->string;
         switch(t.type)
         {
             case COMMAND:
                 //remonte jusqu'au dernier séparateur/la tête
-                while(!is_separator(current)&&
-                        *current.type!=NODE_HEAD)
+                while(!is_separator(current) &&
+                      *current.type!=NODE_HEAD &&
+                      (*current.type!=NODE_BACKTICK ||
+                       is_backtick == 0))
                 {
                     current = current->father;
                 }
@@ -38,7 +55,7 @@ ast_node creating_ast(list* list)
                 new->father = current;
                 *current.nb_child++;
                 if(*current->child ==NULL)
-                *current->child = &new;
+                    *current->child = &new;
                 else
                     **current->child->sibling=&new;
                 break;
@@ -48,19 +65,32 @@ ast_node creating_ast(list* list)
                 //check si le current est un argument, ou si le père est un 
                 //séparateur ou une commande et que son premier fils est diffé
                 //de NULL
-                if(*current.type==NODE_ARGUMENT||
-                        ((is_separator(*current->father)&&
-                          **current->father.nb_child == 1)||
-                         **current->father==NODE_COMMAND))
+                if((*current.type==NODE_ARGUMENT ||
+                    (*current.type == NODE_BACKTICK &&
+                     is_backtick == 0)) &&
+                   **current->father==NODE_COMMAND)
                 {
-                    current->sibling = &new;
+                    *current->sibling = &new;
                     new->father = current->father;
                     *current->father.nb_child++;
                 }
-                else if(is_separator(*current->father)&&
-                        **current->father.nb_child>1)
+                else if(*current.type==NODE_ARGUMENT ||
+                        (*current.type == NODE_BACKTICK &&
+                         is_backtick == 1))
                 {
                     //error dans la grammaire
+                }
+                else if(is_separator(current)&&
+                        !is_chevron(current))
+                {
+                    //error : father is a separator (but not a chevron)
+                }
+                else if(is_chevron(current))
+                {
+                    current = *current->child;
+                    *current->sibling = &new;
+                    new->father = current->father;
+                    *current->father.nb_child++;
                 }
                 else
                 {
@@ -70,7 +100,7 @@ ast_node creating_ast(list* list)
                 create_argument(&new);
                 break;
             case AND_BOOL:
-                if(is_separator(current.type))
+                if(is_separator(current))
                 {
                     //erreur de grammaire(deux separateur se suivent)
                 }
@@ -140,9 +170,14 @@ ast_node creating_ast(list* list)
                 {
                     //erreur de grammaire(deux separateur se suivent)
                 }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un and ne peut pas séparer deux arg
+                    current=*current->father;
+                }
                 while(is_separator(*current->fahter))
                 {
-                    //car le < doit avoir lieu après l'exec des précédents
+                    //car le >> doit avoir lieu après l'exec des précédents
                     current = *current->father;
                 }
                 new.type = NODE_DRIGHT_CHEVRON;
@@ -157,9 +192,14 @@ ast_node creating_ast(list* list)
                 {
                     //erreur de grammaire(deux separateur se suivent)
                 }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un and ne peut pas séparer deux arg
+                    current=*current->father;
+                }
                 while(is_separator(*current->fahter))
                 {
-                    //car le < doit avoir lieu après l'exec des précédents
+                    //car le << doit avoir lieu après l'exec des précédents
                     current = *current->father;
                 }
                 new.type = NODE_DLEFT_CHEVRON;
@@ -169,15 +209,127 @@ ast_node creating_ast(list* list)
                 new->child = current;
                 new.nb_child++;
                 break;
+            case RIGHT_CHEVRON:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le > doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_RIGHT_CHEVRON;
+                create_right_chevron(&new);
+                new->father = *current->father;
+                *current->father=&new;
+                new->child = current;
+                new.nb_child++;
+                break;
+            case LEFT_CHEVRON:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un and ne peut pas séparer deux arg
+                    current=*current->father;
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le < doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_LEFT_CHEVRON;
+                create_left_chevron(&new);
+                new->father = *current->father;
+                *current->father=&new;
+                new->child = current;
+                new.nb_child++;
+                break;
             case SEMI_COLON:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un semi_colon ne peut pas séparer deux arg
+                    current=*current->father;
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le semi_colon doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_SEMI_COLON;
+                create_semi_colon(&new);
+                new->father = *current->father;
+                *current->father=&new;
+                new->child = current;
+                new.nb_child++;
                 break;
             case LEFT_PAREN:
                 break;
             case RIGHT_PAREN:
                 break;
             case PIPE:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un pipe ne peut pas séparer deux arg
+                    current=*current->father;
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le pipe doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_PIPE;
+                create_pipe(&new);
+                new->father = *current->father;
+                *current->father=&new;
+                new->child = current;
+                new.nb_child++;
                 break;
             case BACKTICK:
+                is_backtick = 1;
+                new.type = NODE_BACKTICK;
+                if((*current.type==NODE_ARGUMENT ||
+                    *current.type == NODE_BACKTICK) &&
+                    **current->father==NODE_COMMAND)
+                {
+                    *current->sibling = &new;
+                    new->father = current->father;
+                    *current->father.nb_child++;
+                }
+                else if(*current.type==NODE_ARGUMENT ||
+                        *current.type == NODE_BACKTICK)
+                {
+                    //error dans la grammaire
+                }
+                else if(is_separator(current)&&
+                        !is_chevron(current))
+                {
+                    //error : father is a separator (but not a chevron)
+                }
+                else if(is_chevron(current))
+                {
+                    current = *current->child;
+                    *current->sibling = &new;
+                    new->father = current->father;
+                    *current->father.nb_child++;
+                }
+                else
+                {
+                    current->child = &new;
+                    new->father = current;
+                }
+                create_backtick(&new);
                 break;
             default:
                 //unidentified token
@@ -211,6 +363,12 @@ void free_ast(ast_node node)
             break;
         case NODE_DLEFT_CHEVRON:
             free(node.data->node_dleft_chevron);
+            break;
+        case NODE_RIGHT_CHEVRON:
+            free(node.data->node_right_chevron);
+            break;
+        case NODE_LEFT_CHEVRON:
+            free(node.data->node_left_chevron);
             break;
         case NODE_UNKNOWN:
             free(node.data->node_unknown);
@@ -250,6 +408,8 @@ void free_ast(ast_node node)
     free(node);
 }
 
+
+// Fonctions pour check des trucs sans se repeter 20x
 int is_separator(ast_node* current)
 {
     //vérifie si la node est un séparateur
@@ -258,8 +418,27 @@ int is_separator(ast_node* current)
         case NODE_AND_BOOL:
         case NODE_OR_BOOL:
         case NODE_AND:
+        case NODE_SEMI_COLON:
         case NODE_DRIGHT_CHEVRON:
         case NODE_DLEFT_CHEVRON:
+        case NODE_RIGHT_CHEVRON:
+        case NODE_LEFT_CHEVRON:
+        case NODE_PIPE:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+int is_chevron(ast_node* current)
+{
+    //verifie si la node est un chevron
+    switch(*current.type)
+    {
+        case NODE_DRIGHT_CHEVRON:
+        case NODE_DLEFT_CHEVRON:
+        case NODE_RIGHT_CHEVRON:
+        case NODE_LEFT_CHEVRON:
             return 1;
         default:
             return 0;
@@ -273,6 +452,7 @@ void create_or_bool(ast_node* new)
     new_data->node = new;
 }
 
+//<<
 void create_dleft_chevron(ast_node* new)
 {
     struct node_dleft_chevron new_data = 
@@ -281,11 +461,30 @@ void create_dleft_chevron(ast_node* new)
     new_data->node = new;
 }
 
+//>>
 void create_dright_chevron(ast_node* new)
 {
     struct node_dright_chevron new_data = 
         calloc(sizeof(struct node_dright_chevron),1);
     *new.data->node_dright_chevron=&new_data;
+    new_data->node = new;
+}
+
+//<
+void create_left_chevron(ast_node* new)
+{
+    struct node_left_chevron new_data = 
+        calloc(sizeof(struct node_left_chevron),1);
+    *new.data->node_left_chevron=&new_data;
+    new_data->node = new;
+}
+
+//>
+void create_right_chevron(ast_node* new)
+{
+    struct node_right_chevron new_data = 
+        calloc(sizeof(struct node_right_chevron),1);
+    *new.data->node_right_chevron=&new_data;
     new_data->node = new;
 }
 
@@ -319,6 +518,35 @@ void create_command(ast_node *new)
     new_data->node = new;
 }
 
+void create_and(ast_node* new)
+{
+    struct node_and new_data = calloc(sizeof(struct node_and),1);
+    *new.data->node_and=&new_data;
+    new_data->node = new;
+}
+
+void create_semi_colon(ast_node* new)
+{
+    struct node_semi_colon new_data = calloc(sizeof(struct node_semi_colon),1);
+    *new.data->node_semi_colon=&new_data;
+    new_data->node = new;
+}
+
+void create_pipe(ast_node* new)
+{
+    struct node_pipe new_data = calloc(sizeof(struct node_pipe),1);
+    *new.data->node_pipe=&new_data;
+    new_data->node = new;
+}
+
+void create_backtick(ast_node* new)
+{
+    struct node_backtick new_data = calloc(sizeof(struct node_backtick),1);
+    *new.data->node_backtick=&new_data;
+    new_data->node = new;
+}
+
+//function to check errors for command
 void check_command(ast_node* new)
 {
     /*

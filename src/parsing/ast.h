@@ -28,6 +28,8 @@ typedef struct ast_node
         NODE_AND,
         NODE_DRIGHT_CHEVRON,
         NODE_DLEFT_CHEVRON,
+        NODE_RIGHT_CHEVRON,
+        NODE_LEFT_CHEVRON,
 
         //COMMA ??????????
         NODE_COMMENT,
@@ -59,6 +61,8 @@ typedef struct ast_node
         struct node_and *node_and;
         struct node_dright_chevron *node_dright_chevron;
         struct node_dleft_chevron *node_dleft_chevron;
+        struct node_right_chevron *node_right_chevron;
+        struct node_left_chevron *node_left_chevron;
 
         //COMMA ??????????
         struct node_comment *node_command;
@@ -121,10 +125,37 @@ struct node_dright_chevron
 {
     ast_node *node;
 };
-qtruct node_dleft_chevron
+
+struct node_dleft_chevron
 {
     ast_node *node
 };
+
+struct node_right_chevron
+{
+    ast_node *node;
+};
+
+struct node_left_chevron
+{
+    ast_node *node
+};
+
+struct node_semi_colon
+{
+    ast_node *node
+};
+
+struct node_pipe
+{
+    ast_node *node
+};
+
+struct node_backtick
+{
+    ast_node *node
+};
+
 //unknown
 struct node_unknown
 {
