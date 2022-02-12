@@ -93,14 +93,38 @@ typedef struct ast_node
 struct node_command
 {
     enum cmd cmd;
+    ast_node *node;
 };
 
 //argument
 struct node_argument
 {
-
+    ast_node *node;
 };
 
+struct node_and_bool
+{
+    ast_node *node;    
+};
+
+struct node_or_bool
+{
+    ast_node *node;  
+};
+
+struct node_and
+{
+    ast_node *node;
+};
+
+struct node_dright_chevron
+{
+    ast_node *node;
+};
+qtruct node_dleft_chevron
+{
+    ast_node *node
+};
 //unknown
 struct node_unknown
 {

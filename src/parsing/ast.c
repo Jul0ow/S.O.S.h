@@ -25,7 +25,8 @@ ast_node creating_ast(list* list)
                 {
                     current = current->father;
                 }
-                //si le séparateur a plus d'un enfant ou 
+                //si le séparateur a plus d'un enfant ou que c'est la tête et
+                //qu'elle a déjà un enfant
                 if(*current.nb_child >1||
                         (*current.type == NODE_HEAD &&
                          *current.nb_child >0))
@@ -33,7 +34,7 @@ ast_node creating_ast(list* list)
                     //erreur de grammaire
                 }
                 new.type = NODE_COMMAND;
-                create_command(new);
+                create_command(&new);
                 new->father = current;
                 *current.nb_child++;
                 if(*current->child ==NULL)
@@ -42,8 +43,6 @@ ast_node creating_ast(list* list)
                     **current->child->sibling=&new;
                 break;
             case ARGUMENT:
-                // attention : si c'est un flag, on le met directement dans la 
-                // node père (la node de la commande)
                 new.type = NODE_ARGUMENT;
                 new->father = current;
                 //check si le current est un argument, ou si le père est un 
@@ -66,19 +65,109 @@ ast_node creating_ast(list* list)
                 else
                 {
                     current->child = &new;
-                    new-father = current;
+                    new->father = current;
                 }
+                create_argument(&new);
                 break;
             case NODE_AND_BOOL:
-                
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un and ne peut pas séparer deux arg
+                    current=*current->father;
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le && doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_AND_BOOL;
+                create_and_bool(&new);
+                new->father = *current->father;
+                *current->father = &new;
+                new->child = current;
+                new.nb_child ++;
                 break
             case NODE_OR_BOOL:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un or ne peut pas séparer deux arg
+                    current=*current->father;
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le || doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_OR_BOOL;
+                create_or_bool(&new);
+                new->father = *current->father;
+                *current->father = &new;
+                new->child = current;
+                new.nb_child ++;
                 break;
             case NODE_AND:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                else if(*current.type==NODE_ARGUMENT)
+                {
+                    //car un and ne peut pas séparer deux arg
+                    current=*current->father;
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le & doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_AND;
+                create_and(&new);
+                new->father = *current->father;
+                *current->father=&new;
+                new->child = current;
+                new.nb_child++;
                 break;
             case NODE_DRIGHT_CHEVRON:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le < doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_DRIGHT_CHEVRON;
+                create_dright_chevron(&new);
+                new->father = *current->father;
+                *current->father=&new;
+                new->child = current;
+                new.nb_child++;
                 break;
             case NODE_DLEFT_CHEVRON:
+                if(is_separator(current.type))
+                {
+                    //erreur de grammaire(deux separateur se suivent)
+                }
+                while(is_separator(*current->fahter))
+                {
+                    //car le < doit avoir lieu après l'exec des précédents
+                    current = *current->father;
+                }
+                new.type = NODE_DLEFT_CHEVRON;
+                create_dleft_chevron(&new);
+                new->father = *current->father;
+                *current->father=&new;
+                new->child = current;
+                new.nb_child++;
                 break;
         }
         current = &new;
@@ -88,8 +177,13 @@ ast_node creating_ast(list* list)
 
 void free_ast(ast_node node)
 {
+    //free récursivement le contenu des nodes, avant de free les nodes
+    //elle-même (il faut commencer depuis la racine)
     switch(node.type)
     {
+        case NODE_HEAD:
+            free(node.data->node_head);
+            break;
         case NODE_AND_BOOL:
             free(node.data->node_and_bool);
             break;
@@ -145,6 +239,7 @@ void free_ast(ast_node node)
 
 int is_separator(ast_node* current)
 {
+    //vérifie si la node est un séparateur
     switch(*current.type)
     {
         case NODE_AND_BOOL:
@@ -158,50 +253,87 @@ int is_separator(ast_node* current)
     }
 }
 
-void create_argument(ast_node new)
+void create_or_bool(ast_node* new)
 {
-    node_argument new_data =calloc(sizeof(struct node_argument),1);
-    new.data->node_argument = &new_data;
+    struct node_or_bool new_data = calloc(sizeof(struct node_or_bool),1);
+    *new.data->node_or_bool=&new_data;
+    new_data->node = new;
+}
+
+void create_dleft_chevron(ast_node* new)
+{
+    struct node_dleft_chevron new_data = 
+        calloc(sizeof(struct node_dleft_chevron),1);
+    *new.data->node_dleft_chevron=&new_data;
+    new_data->node = new;
+}
+
+void create_dright_chevron(ast_node* new)
+{
+    struct node_dright_chevron new_data = 
+        calloc(sizeof(struct node_dright_chevron),1);
+    *new.data->node_dright_chevron=&new_data;
+    new_data->node = new;
+}
+
+void create_and(ast_node* new)
+{
+    struct node_and new_data = calloc(sizeof(struct node_and),1);
+    *new.data->node_and=&new_data;
+    new_data->node = new;
+}
+
+void create_and_bool(ast_node* new)
+{
+    struct node_and_bool new_data = calloc(sizeof(struct node_and_bool),1);
+    *new.data->node_and_bool = &new_data;
+    new_data->node = new;
+}
+
+void create_argument(ast_node *new)
+{
+    struct node_argument new_data =calloc(sizeof(struct node_argument),1);
+    *new.data->node_argument = &new_data;
     new_data->node = new;
 
 }
 
-void create_command(ast_node new)
+void create_command(ast_node *new)
 {
-    node_command new_data = calloc(sizeof(struct node_command),1);
-    new.data->node_command = &new_data;
+    struct node_command new_data = calloc(sizeof(struct node_command),1);
+    *new.data->node_command = &new_data;
     check_command(new);
     new_data->node = new;
 }
 
-void check_command(ast_node new)
+void check_command(ast_node* new)
 {
     /*
        vérifie si la commande entrée est valide
        */
-    switch(new.string)
+    switch(*new.string)
     {
         case "cat":
-            new.data->node_command.cmd = CAT;
+            *new.data->node_command.cmd = CAT;
             break;
 
             //ajouter ici les prochaines commandes
 
         default:
-            if(strlen(new.string)>2)
+            if(strlen(*new.string)>2)
             {
-                if(new.string[0]=='/'||
-                        (new.string[1]=='/'&&new.string[0]=='.'))
+                if(*new.string[0]=='/'||
+                        (*new.string[1]=='/'&&*new.string[0]=='.'))
                 {
                     //vérifie si le fichier est bien un exécutable
-                    if(access(new.string,X_OK == 0))
-                        new.data->node_command.cmd = DEFAULT;
+                    if(access(*new.string,X_OK == 0))
+                        *new.data->node_command.cmd = DEFAULT;
                     else
-                        new.type = NODE_UNKNOWN;
-                    free(new.data->node_command);
+                        *new.type = NODE_UNKNOWN;
+                    free(*new.data->node_command);
                     struct node_unknown data=
                         calloc(sizeof(struct node_unknown),1);
-                    new.data->node_unknown = &data;
+                    *new.data->node_unknown = &data;
                     data.type = EXEC_NOT_FOUND;
                 }
             }
