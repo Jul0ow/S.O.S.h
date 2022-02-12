@@ -86,6 +86,63 @@ ast_node creating_ast(list* list)
     }
 }
 
+void free_ast(ast_node node)
+{
+    switch(node.type)
+    {
+        case NODE_AND_BOOL:
+            free(node.data->node_and_bool);
+            break;
+        case NODE_OR_BOOL:
+            free(node.data->node_or_bool);
+            break;
+        case NODE_AND:
+            free(node.data->node_and);
+            break;
+        case NODE_DRIGHT_CHEVRON:
+            free(node.data->node_dright_chevron);
+            break;
+        case NODE_DLEFT_CHEVRON:
+            free(node.data->node_dleft_chevron);
+            break;
+        case NODE_UNKNOWN:
+            free(node.data->node_unknown);
+            break;
+        case NODE_COMMAND:
+            free(node.data->node_command);
+            break;
+        case NODE_ARGUMENT:
+            free(node.data->node_argument);
+            break;
+        case NODE_SEMI_COLON:
+            free(node.data->node_semi_colon);
+            break;
+        case NODE_LEFT_PAREN:
+            free(node.data->node_left_paren);
+            break;
+        case NODE_RIGHT_PAREN:
+            free(node.data->node_right_paren);
+            break;
+        case NODE_PIPE:
+            free(node.data->node_pipe);
+            break;
+        case NODE_QUOTE:
+            free(node.data->node_quote);
+            break;
+        case NODE_DOUBLE_QUOTES:
+            free(node.data->node_double_quotes);
+            break;
+        case NODE_BACKTICK:
+            free(node.data->node_backtick);
+            break;
+        default:
+            //an error occured
+    }
+    free_ast(*node->child);
+    free_ast(*node->sibling);
+    free(node);
+}
+
 int is_separator(ast_node* current)
 {
     switch(*current.type)
