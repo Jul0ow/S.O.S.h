@@ -1,13 +1,114 @@
 #include "user_interface.h"
 
 //===================================================================
+// Functions for history
+
+void print_hist(History* hist)
+{
+    Lhist* lhist = hist->lhist;
+    lhist = lhist->next;
+    for (; lhist; lhist = lhist->next)
+	printf("%s\n", lhist->data);
+}
+
+Lhist* init_lhist(char* data)
+{
+    Lhist* lhist = malloc(sizeof(Lhist));
+    lhist->next = NULL;
+    lhist->prev = NULL;
+    lhist->data = data;
+    return lhist;
+}
+
+History* init_hist(int load)
+{
+    load = load;
+    History* hist = malloc(sizeof(History));
+    hist->lhist = init_lhist(NULL);
+    hist->tail = hist->lhist;
+    hist->size = 0;
+    hist->index = -1;
+    return hist;
+}
+
+void free_lhist(Lhist* lhist)
+{
+    free(lhist->data);
+    free(lhist);
+}
+
+void free_hist(History* hist)
+{
+    Lhist* p;
+    Lhist* lhist = hist->lhist;
+    while (lhist != NULL)
+    {
+	p = lhist->next;
+	free_lhist(lhist);
+	lhist = p;
+    }
+
+    free(hist);
+}
+
+void append_hist(History* hist, char* data)
+{
+    hist->index = hist->size - 1;
+    if (hist->tail->data && strcmp(hist->tail->data, data) == 0)
+	return;
+
+    Lhist* lhist = hist->lhist;
+    Lhist* elm = init_lhist(data);
+    for (; lhist->next; lhist = lhist->next)
+        continue;
+    elm->prev = lhist;
+    elm->next = lhist->next;
+    lhist->next = elm;
+
+    hist->tail = elm;
+    hist->index = hist->size;
+    hist->size += 1;
+}
+
+void pop_hist(History *hist)
+{
+    if (hist->tail->prev)
+    {
+        Lhist *p = hist->tail;
+        hist->tail->prev->next = NULL;
+        hist->tail = p->prev;
+        free_lhist(p);
+	hist->size--;
+    }
+}
+
+char* get_data(History* hist)
+{
+    Lhist* lhist = hist->lhist->next;
+    for (int i = 0; i < hist->index; i++)
+	lhist = lhist->next;
+    return lhist->data;
+}
+
+void update_string(UI* ui)
+{
+    if (ui->hist->index >= 0 && ui->hist->index < ui->hist->size)
+    {
+        History* hist = ui->hist;
+        char* str = get_data(hist);
+        gtk_text_buffer_set_text(ui->buffer, str, strlen(str));
+        gtk_text_view_set_buffer(ui->text_view, ui->buffer);
+    }
+}
+
+//===================================================================
 // Functions for create a new line in the shell
 
 char* get_dir()
 {
     char *s = malloc(SIZE * sizeof(char));
     while (getcwd(s, SIZE) == NULL)
-        if (realloc(s, SIZE + SIZE) == NULL) errx(1, "realloc");
+        if ((s = realloc(s, SIZE + SIZE)) == NULL) errx(1, "realloc");
     return s;
 }
 
@@ -167,8 +268,8 @@ void execute_command(UI *ui, char* text)
     }
     else
     {
-        if (wait(NULL) == -1)
-            errx(1, "The wait function failed");
+        /*if (wait(NULL) == -1)
+            errx(1, "The wait function failed");*/
         close(p[1]);
 
 	//free_args(args);
@@ -188,7 +289,14 @@ void execute_command(UI *ui, char* text)
 		 s = calloc(SIZE, sizeof(char));
 	     }
 	     else
-                 strcat(s, tmp);
+	     {
+		 if (tmp[0] == ' ')
+		     strcat(s, "   ");
+		 else if (tmp[0] == '\t')
+		     strcat(s, "                        ");
+		 else
+                     strcat(s, tmp);
+	     }
         }
 
 	if (*s != '\0')
@@ -222,29 +330,19 @@ void evaluate_string(UI *ui)
     char *text = get_string(ui);
     //new_line(ui, text, text);
 
-    if (text[0] != '\0') 
+    if (text[0] != '\0')
+    {
         execute_command(ui, text);
+	append_hist(ui->hist, text);
+	print_hist(ui->hist);
+    }
     else
+    {
 	new_line(ui, text, "");
-    
-    free(text);
-}
+        free(text);
+    }
 
-/*
-//test button
-void _print(GtkButton *button, gpointer user_data)
-{
-    UI *ui = user_data;
-    if (button == ui->b1)
-    {
-	get_string(ui);
-    }
-    else
-    {
-	remove_line(ui);
-    }
 }
-*/
 
 //===================================================================
 // Auto-completion functions
@@ -322,13 +420,44 @@ void auto_completion(UI *ui)
     free(text);
 }
 
+//===================================================================
+// Function which creates a new shell
+
+void new_window()
+{
+    pid_t pid = fork();
+    if (pid == -1)
+    {
+        errx(1, "Could not fork!");
+    }
+    else if (pid == 0)
+    {
+	char* args[] = {"./main", NULL};
+        if (execv("./main", args) == -1)
+            errx(1, "error open new shell");
+        exit(EXIT_SUCCESS);
+    }
+    else
+    {
+	// TODO zombie if not wait
+	return;
+    }
+}
+
+//===================================================================
+// Key management
+
 // gets the key press
 gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
 {
     widget = widget;
     UI *ui = user_data;
 
-    if (evt->keyval == GDK_KEY_Return)
+    if (evt->keyval == GDK_KEY_Alt_L)
+    {
+	printf("Nothing Loooooooooooooooooooooooooooooooool\n");
+    }
+    else if (evt->keyval == GDK_KEY_Return)
     {
 	evaluate_string(ui);
 	free_Pgraphs(ui->Gs);
@@ -336,9 +465,30 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *evt, gpointer user_data)
         ui->Gs = init_Pgraphs(G);
 	return TRUE;
     }
+    else if (evt->keyval == GDK_KEY_Up)
+    {
+	printf("UP\n");
+        printf("index = %d, size = %d\n", ui->hist->index, ui->hist->size);
+	update_string(ui);
+	if (ui->hist->index > 0)
+	    ui->hist->index--;
+	return TRUE;
+    }
+    else if (evt->keyval == GDK_KEY_Down)
+    {
+	printf("DOWN\n");
+	if (ui->hist->index < ui->hist->size)
+	    ui->hist->index++;
+	update_string(ui);
+	return TRUE;
+    }
     else if (evt->keyval == GDK_KEY_Tab)
     {
 	auto_completion(ui);
+    }
+    else if (evt->keyval == GDK_KEY_Control_L)
+    {
+	new_window();
     }
     else if (evt->keyval == GDK_KEY_BackSpace)
     {
@@ -425,7 +575,6 @@ int main(void)
 
     GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder, "Main_window"));
     GtkTextBuffer* buffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "Text_buffer"));
-    //GtkButton* b1 = GTK_BUTTON(gtk_builder_get_object(builder, "Button1"));
     GtkWidget *scroll = GTK_WIDGET(gtk_builder_get_object(builder, "scroll"));
 
     GtkWidget *grid;
@@ -440,21 +589,23 @@ int main(void)
 	.buffer = buffer,
 	.completion = NULL,
 	.Gs = NULL,
-	//.b1 = b1,
+	.hist = NULL,
     };
 
+    ui.hist = init_hist(0);
     Pgraph *G = create_Pgraph_with_dir("./");
     ui.Gs = init_Pgraphs(G);
 
     add_line(&ui, 0, "");
-    
+   
+    signal(SIGCHLD, SIG_IGN); 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    //g_signal_connect(b1, "clicked", G_CALLBACK(_print), &ui);
     g_signal_connect(window, "key_press_event", G_CALLBACK(on_key_press), &ui);
 
     gtk_widget_show_all(GTK_WIDGET(ui.window));
 
     gtk_main();
+    free_hist(ui.hist);
     free_Pgraphs(ui.Gs);
 
     return 0;

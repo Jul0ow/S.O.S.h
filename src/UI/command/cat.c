@@ -38,13 +38,13 @@ int main(int argc, char **argv)
     {
 	char buf[BUFF_SIZE];
 	int e;
-	while (1)
-	{
-	    e = scanf("%s", buf);
-	    if (e == 0)
-	        errx(1, "scanf fail");
-	    printf("%s\n", buf);
-	}
+        while (1)
+        {
+            e = scanf("%s", buf);
+            if (e == 0)
+                errx(1, "scanf fail");
+            printf("%s\n", buf);
+        }
     }
 
     int i;

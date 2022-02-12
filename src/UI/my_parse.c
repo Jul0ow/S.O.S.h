@@ -67,7 +67,8 @@ int valid_command(char *cmd)
 {
     if (strcmp(cmd, "cat") == 0
 	|| strcmp(cmd, "ls") == 0
-	|| strcmp(cmd, "pwd") == 0)
+	|| strcmp(cmd, "pwd") == 0
+	|| strcmp(cmd, "cd") == 0)
     {
 	return 1;
     }

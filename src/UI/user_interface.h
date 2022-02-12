@@ -22,6 +22,21 @@ typedef struct Loader
     GtkImage* anim;
 }Loader;
 
+typedef struct Lhist
+{
+    struct Lhist* next;
+    struct Lhist* prev;
+    char* data;
+}Lhist;
+
+typedef struct History
+{
+    struct Lhist* lhist;
+    struct Lhist* tail;
+    int size;
+    int index;
+}History;
+
 typedef struct UserInterface
 {
     GtkWindow *window;
@@ -31,6 +46,7 @@ typedef struct UserInterface
     GtkTextBuffer *buffer;
     GtkLabel *completion;
     Pgraphs *Gs;
+    History* hist;
     //GtkButton *b1;
 }UI;
 
