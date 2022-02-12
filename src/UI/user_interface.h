@@ -9,10 +9,33 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <pthread.h>
 
 #include "prefix_graph.h"
+#include "my_parse.h"
 
 #define SIZE 264
+
+typedef struct Loader
+{
+    GtkWindow* w;
+    GtkImage* anim;
+}Loader;
+
+typedef struct Lhist
+{
+    struct Lhist* next;
+    struct Lhist* prev;
+    char* data;
+}Lhist;
+
+typedef struct History
+{
+    struct Lhist* lhist;
+    struct Lhist* tail;
+    int size;
+    int index;
+}History;
 
 typedef struct UserInterface
 {
@@ -23,6 +46,7 @@ typedef struct UserInterface
     GtkTextBuffer *buffer;
     GtkLabel *completion;
     Pgraphs *Gs;
+    History* hist;
     //GtkButton *b1;
 }UI;
 

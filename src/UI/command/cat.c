@@ -34,16 +34,24 @@ void my_cat(char filename[])
 
 int main(int argc, char **argv)
 {
-    argc = argc;
-    argv = argv;
-    /*
+    if (argc < 2)
+    {
+	char buf[BUFF_SIZE];
+	int e;
+        while (1)
+        {
+            e = scanf("%s", buf);
+            if (e == 0)
+                errx(1, "scanf fail");
+            printf("%s\n", buf);
+        }
+    }
+
     int i;
     for (i = 0; i < argc - 1; i++)
     {
         my_cat(argv[i + 1]);
-    }*/
-    
-    sleep(3);
+    }
 
     return 0;
 }
