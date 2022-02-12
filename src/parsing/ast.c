@@ -12,6 +12,7 @@ ast_node creating_ast(list* list)
     current.type = NODE_HEAD;
     list_elm* p = list->head;
     int is_backtick = 0;
+    size_t nb_parenthesis = 0;
     while(p!=NULL)
     {
         token t = p->token;
@@ -28,6 +29,17 @@ ast_node creating_ast(list* list)
                 current = *current->father;
             }
             p = p->next;
+        }
+        else if(t.type == RIGHT_PAREN)
+        {
+            if(nb_parenthesis == 0)
+                //erreur de grammaire
+            nb_parenthesis --;
+            while(*current.type != NODE_LEFT_PAREN)
+            {
+                current = *current->father;
+            }
+            p=p->next;
         }
         ast_node new = calloc(sizeof(ast_node),1);
         new->string = t->string;
@@ -109,7 +121,7 @@ ast_node creating_ast(list* list)
                     //car un and ne peut pas séparer deux arg
                     current=*current->father;
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le && doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -131,7 +143,7 @@ ast_node creating_ast(list* list)
                     //car un or ne peut pas séparer deux arg
                     current=*current->father;
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le || doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -153,7 +165,7 @@ ast_node creating_ast(list* list)
                     //car un and ne peut pas séparer deux arg
                     current=*current->father;
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le & doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -175,7 +187,7 @@ ast_node creating_ast(list* list)
                     //car un and ne peut pas séparer deux arg
                     current=*current->father;
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le >> doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -197,7 +209,7 @@ ast_node creating_ast(list* list)
                     //car un and ne peut pas séparer deux arg
                     current=*current->father;
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le << doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -214,7 +226,7 @@ ast_node creating_ast(list* list)
                 {
                     //erreur de grammaire(deux separateur se suivent)
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le > doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -236,7 +248,7 @@ ast_node creating_ast(list* list)
                     //car un and ne peut pas séparer deux arg
                     current=*current->father;
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le < doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -258,7 +270,7 @@ ast_node creating_ast(list* list)
                     //car un semi_colon ne peut pas séparer deux arg
                     current=*current->father;
                 }
-                while(is_separator(*current->fahter))
+                while(is_separator(*current->father))
                 {
                     //car le semi_colon doit avoir lieu après l'exec des précédents
                     current = *current->father;
@@ -271,8 +283,29 @@ ast_node creating_ast(list* list)
                 new.nb_child++;
                 break;
             case LEFT_PAREN:
-                break;
-            case RIGHT_PAREN:
+                while(!is_separator(current) &&
+                      *current.type!=NODE_HEAD &&
+                      (*current.type!=NODE_BACKTICK ||
+                       is_backtick == 0))
+                {
+                    current = current->father;
+                }
+                //si le séparateur a plus d'un enfant ou que c'est la tête et
+                //qu'elle a déjà un enfant
+                if(*current.nb_child >1||
+                        (*current.type == NODE_HEAD &&
+                         *current.nb_child >0))
+                {
+                    //erreur de grammaire
+                }
+                new.type = NODE_COMMAND;
+                create_command(&new);
+                new->father = current;
+                *current.nb_child++;
+                if(*current->child ==NULL)
+                    *current->child = &new;
+                else
+                    **current->child->sibling=&new;
                 break;
             case PIPE:
                 if(is_separator(current.type))
