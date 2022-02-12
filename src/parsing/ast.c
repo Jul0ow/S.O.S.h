@@ -69,7 +69,7 @@ ast_node creating_ast(list* list)
                 }
                 create_argument(&new);
                 break;
-            case NODE_AND_BOOL:
+            case AND_BOOL:
                 if(is_separator(current.type))
                 {
                     //erreur de grammaire(deux separateur se suivent)
@@ -91,7 +91,7 @@ ast_node creating_ast(list* list)
                 new->child = current;
                 new.nb_child ++;
                 break
-            case NODE_OR_BOOL:
+            case OR_BOOL:
                 if(is_separator(current.type))
                 {
                     //erreur de grammaire(deux separateur se suivent)
@@ -113,7 +113,7 @@ ast_node creating_ast(list* list)
                 new->child = current;
                 new.nb_child ++;
                 break;
-            case NODE_AND:
+            case AND:
                 if(is_separator(current.type))
                 {
                     //erreur de grammaire(deux separateur se suivent)
@@ -135,7 +135,7 @@ ast_node creating_ast(list* list)
                 new->child = current;
                 new.nb_child++;
                 break;
-            case NODE_DRIGHT_CHEVRON:
+            case DRIGHT_CHEVRON:
                 if(is_separator(current.type))
                 {
                     //erreur de grammaire(deux separateur se suivent)
@@ -152,7 +152,7 @@ ast_node creating_ast(list* list)
                 new->child = current;
                 new.nb_child++;
                 break;
-            case NODE_DLEFT_CHEVRON:
+            case DLEFT_CHEVRON:
                 if(is_separator(current.type))
                 {
                     //erreur de grammaire(deux separateur se suivent)
@@ -168,6 +168,19 @@ ast_node creating_ast(list* list)
                 *current->father=&new;
                 new->child = current;
                 new.nb_child++;
+                break;
+            case SEMI_COLON:
+                break;
+            case LEFT_PAREN:
+                break;
+            case RIGHT_PAREN:
+                break;
+            case PIPE:
+                break;
+            case BACKTICK:
+                break;
+            default:
+                //unidentified token
                 break;
         }
         current = &new;
