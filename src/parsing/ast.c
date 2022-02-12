@@ -5,11 +5,11 @@
 #include "../lexing/lexer.h"
 #include "../utils/list.h"
 
-ast_node creating_ast(list* list)
+ast_node* creating_ast(list* list)
 {
     ast_node first = calloc(sizeof(ast_node),1);
     ast_node* current = &first;
-    current.type = NODE_HEAD;
+    *current.type = NODE_HEAD;
     list_elm* p = list->head;
     int is_backtick = 0;
     size_t nb_parenthesis = 0;
@@ -24,9 +24,14 @@ ast_node creating_ast(list* list)
         else if (t.type == BACKTICK && is_backtick == 1)
         {
             is_backtick = 0;
-            while (*current.type != NODE_BACKTICK)
+            while (*current.type != NODE_BACKTICK &&
+                    *current.type != NODE_HEAD)
             {
                 current = *current->father;
+            }
+            if(*current.type == NODE_HEAD)
+            {
+                //erreur de grammaire
             }
             p = p->next;
         }
@@ -35,10 +40,16 @@ ast_node creating_ast(list* list)
             if(nb_parenthesis == 0)
                 //erreur de grammaire
             nb_parenthesis --;
-            while(*current.type != NODE_LEFT_PAREN)
+            while(*current.type != NODE_LEFT_PAREN &&
+                    *current.type != NODE_HEAD)
             {
                 current = *current->father;
             }
+            if(*current.type == NODE_HEAD)
+            {
+                //erreur de grammaire
+            }
+            *current->node_left_paren.closed =1;
             p=p->next;
         }
         ast_node new = calloc(sizeof(ast_node),1);
@@ -50,7 +61,9 @@ ast_node creating_ast(list* list)
                 while(!is_separator(current) &&
                       *current.type!=NODE_HEAD &&
                       (*current.type!=NODE_BACKTICK ||
-                       is_backtick == 0))
+                       is_backtick == 0)&&(*current.type!=LEFT_PAREN ||
+                           (*current.type==LEFT_PAREN &&
+                           **current.data->node_left_paren.closed == 0)))
                 {
                     current = current->father;
                 }
@@ -88,7 +101,7 @@ ast_node creating_ast(list* list)
                 }
                 else if(*current.type==NODE_ARGUMENT ||
                         (*current.type == NODE_BACKTICK &&
-                         is_backtick == 1))
+                         is_backtick == 1)||(*current.type == NODE_LEFT_PAREN))
                 {
                     //error dans la grammaire
                 }
@@ -286,7 +299,9 @@ ast_node creating_ast(list* list)
                 while(!is_separator(current) &&
                       *current.type!=NODE_HEAD &&
                       (*current.type!=NODE_BACKTICK ||
-                       is_backtick == 0))
+                       is_backtick == 0)&&(*current.type!=LEFT_PAREN ||
+                           (*current.type==LEFT_PAREN &&
+                           **current.data->node_left_paren.closed == 0)))
                 {
                     current = current->father;
                 }
@@ -298,8 +313,8 @@ ast_node creating_ast(list* list)
                 {
                     //erreur de grammaire
                 }
-                new.type = NODE_COMMAND;
-                create_command(&new);
+                new.type = NODE_LEFT_PAREN;
+                create_left_paren(&new);
                 new->father = current;
                 *current.nb_child++;
                 if(*current->child ==NULL)
@@ -371,6 +386,15 @@ ast_node creating_ast(list* list)
         current = &new;
         p = p->next;
     }
+    if(nb_parenthesis != 0)
+    {
+        //erreur de grammaire
+    }
+    while(*current->type != NODE_HEAD)
+    {
+        current = *current->father;
+    }
+    return current;
 }
 
 void free_ast(ast_node node)
@@ -482,6 +506,13 @@ void create_or_bool(ast_node* new)
 {
     struct node_or_bool new_data = calloc(sizeof(struct node_or_bool),1);
     *new.data->node_or_bool=&new_data;
+    new_data->node = new;
+}
+
+void create_left_paren(ast_node* new)
+{
+    struct node_left_paren new_data = calloc(sizeof(struct node_left_paren),1);
+    *new.data->node_left_paren=&new_data;
     new_data->node = new;
 }
 

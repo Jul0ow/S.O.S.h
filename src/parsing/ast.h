@@ -156,6 +156,12 @@ struct node_backtick
     ast_node *node
 };
 
+struct node_left_paren
+{
+    ast_node *node;
+    int closed = 0;
+};
+
 //unknown
 struct node_unknown
 {
