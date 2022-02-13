@@ -53,6 +53,8 @@ struct ast_node
     //struct of each type of node (matches the node_type)
     union
     {
+        //Head
+        struct node_head    *node_head;
         //Commands etc...
         struct node_command *node_command;
         struct node_argument *node_argument;
@@ -176,12 +178,15 @@ struct node_unknown
     } type;
 };
 
+struct node_head{
+    ast_node* node;
+};
 
 // === Initialisation foncitons ===
 
 ast_node* creating_ast(listT* list);
 
-void free_ast(ast_node node);
+void free_ast(ast_node* node);
 
 int is_separator(ast_node* current);
 

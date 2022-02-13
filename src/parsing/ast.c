@@ -8,9 +8,16 @@
 
 ast_node* creating_ast(listT* list)
 {
-    ast_node first = malloc(sizeof(ast_node));
+    ast_node first = {
+        NODE_HEAD,
+        data.node_head = NULL,
+        "",
+        0,
+        NULL,
+        NULL,
+        NULL,
+    };
     ast_node* current = &first;
-    current->type = NODE_HEAD;
     list_elm* p = list->head;
     int is_backtick = 0;
     size_t nb_parenthesis = 0;
@@ -50,15 +57,19 @@ ast_node* creating_ast(listT* list)
             {
                 //erreur de grammaire
             }
-            current->data->node_left_paren.closed =1;
+            current->data.node_left_paren->closed =1;
             p=p->next;
         }
-        ast_node new = malloc(sizeof(ast_node));
-        new.string = t.string;
-        new.nb_child = 0;
-        new.child = NULL;
-        new.father = NULL;
-        new.sibling = NULL;
+        ast_node new = {
+        NODE_HEAD,
+        data.node_head = NULL,
+        t.string,
+        0,
+        NULL,
+        NULL,
+        NULL,
+        };
+
         switch(t.type)
         {
             case COMMAND:
@@ -68,7 +79,7 @@ ast_node* creating_ast(listT* list)
                       (current->type!=NODE_BACKTICK ||
                        is_backtick == 0)&&(current->type!=NODE_LEFT_PAREN ||
                            (current->type==NODE_LEFT_PAREN &&
-                           current->data->node_left_paren.closed == 0)))
+                           current->data.node_left_paren->closed == 0)))
                 {
                     current = current->father;
                 }
@@ -306,7 +317,7 @@ ast_node* creating_ast(listT* list)
                       (current->type!=NODE_BACKTICK ||
                        is_backtick == 0)&&(current->type!=NODE_LEFT_PAREN ||
                            (current->type==NODE_LEFT_PAREN &&
-                           current->data->node_left_paren.closed == 0)))
+                           current->data.node_left_paren->closed == 0)))
                 {
                     current = current->father;
                 }
@@ -402,68 +413,69 @@ ast_node* creating_ast(listT* list)
     return current;
 }
 
-void free_ast(ast_node node)
+void free_ast(ast_node* node)
 {
     //free récursivement le contenu des nodes, avant de free les nodes
     //elle-même (il faut commencer depuis la racine)
-    switch(node.type)
+    switch(node->type)
     {
         case NODE_HEAD:
-            free(node.data->node_head);
+            free(node->data.node_head);
             break;
         case NODE_AND_BOOL:
-            free(node.data->node_and_bool);
+            free(node->data.node_and_bool);
             break;
         case NODE_OR_BOOL:
-            free(node.data->node_or_bool);
+            free(node->data.node_or_bool);
             break;
         case NODE_AND:
-            free(node.data->node_and);
+            free(node->data.node_and);
             break;
         case NODE_DRIGHT_CHEVRON:
-            free(node.data->node_dright_chevron);
+            free(node->data.node_dright_chevron);
             break;
         case NODE_DLEFT_CHEVRON:
-            free(node.data->node_dleft_chevron);
+            free(node->data.node_dleft_chevron);
             break;
         case NODE_RIGHT_CHEVRON:
-            free(node.data->node_right_chevron);
+            free(node->data.node_right_chevron);
             break;
         case NODE_LEFT_CHEVRON:
-            free(node.data->node_left_chevron);
+            free(node->data.node_left_chevron);
             break;
         case NODE_UNKNOWN:
-            free(node.data->node_unknown);
+            free(node->data.node_unknown);
             break;
         case NODE_COMMAND:
-            free(node.data->node_command);
+            free(node->data.node_command);
             break;
         case NODE_ARGUMENT:
-            free(node.data->node_argument);
+            free(node->data.node_argument);
             break;
         case NODE_SEMI_COLON:
-            free(node.data->node_semi_colon);
+            free(node->data.node_semi_colon);
             break;
         case NODE_LEFT_PAREN:
-            free(node.data->node_left_paren);
+            free(node->data.node_left_paren);
             break;
         case NODE_RIGHT_PAREN:
-            free(node.data->node_right_paren);
+            free(node->data.node_right_paren);
             break;
         case NODE_PIPE:
-            free(node.data->node_pipe);
+            free(node->data.node_pipe);
             break;
         case NODE_QUOTE:
-            free(node.data->node_quote);
+            free(node->data.node_quote);
             break;
         case NODE_DOUBLE_QUOTES:
-            free(node.data->node_double_quotes);
+            free(node->data.node_double_quotes);
             break;
         case NODE_BACKTICK:
-            free(node.data->node_backtick);
+            free(node->data.node_backtick);
             break;
         default:
             //an error occured
+            break;
     }
     free_ast(node->child);
     free_ast(node->sibling);
@@ -509,104 +521,114 @@ int is_chevron(ast_node* current)
 
 void create_or_bool(ast_node* new)
 {
-    struct node_or_bool new_data = calloc(sizeof(struct node_or_bool),1);
-    new->data->node_or_bool=&new_data;
-    new_data.node = new;
+    struct node_or_bool new_data = {
+      new,  
+    };
+    new->data.node_or_bool=&new_data;
 }
 
 void create_left_paren(ast_node* new)
 {
-    struct node_left_paren new_data = calloc(sizeof(struct node_left_paren),1);
-    new->data->node_left_paren=&new_data;
-    new_data.node = new;
-    new_data.closed = 0;
+    struct node_left_paren new_data = {
+      new,
+      0,
+    };
+    new->data.node_left_paren=&new_data;
 }
 
 //<<
 void create_dleft_chevron(ast_node* new)
 {
-    struct node_dleft_chevron new_data = 
-        calloc(sizeof(struct node_dleft_chevron),1);
-    new->data->node_dleft_chevron=&new_data;
-    new_data.node = new;
+    struct node_dleft_chevron new_data ={
+      new,  
+    };
+    new->data.node_dleft_chevron=&new_data;
 }
 
 //>>
 void create_dright_chevron(ast_node* new)
 {
-    struct node_dright_chevron new_data = 
-        calloc(sizeof(struct node_dright_chevron),1);
-    new->data->node_dright_chevron=&new_data;
-    new_data.node = new;
+    struct node_dright_chevron new_data = {
+      new,  
+    };
+    new->data.node_dright_chevron=&new_data;
 }
 
 //<
 void create_left_chevron(ast_node* new)
 {
     struct node_left_chevron new_data = 
-        calloc(sizeof(struct node_left_chevron),1);
-    new->data->node_left_chevron=&new_data;
-    new_data.node = new;
+        {
+      new,  
+    };
+    new->data.node_left_chevron=&new_data;
 }
 
 //>
 void create_right_chevron(ast_node* new)
 {
-    struct node_right_chevron new_data = 
-        calloc(sizeof(struct node_right_chevron),1);
-    new->data->node_right_chevron=&new_data;
-    new_data.node = new;
+    struct node_right_chevron new_data = {
+      new,  
+    };
+    new->data.node_right_chevron=&new_data;
 }
 
 void create_and_bool(ast_node* new)
 {
-    struct node_and_bool new_data = calloc(sizeof(struct node_and_bool),1);
-    new->data->node_and_bool = &new_data;
-    new_data.node = new;
+    struct node_and_bool new_data ={
+      new,  
+    };
+    new->data.node_and_bool = &new_data;
 }
 
 void create_argument(ast_node *new)
 {
-    struct node_argument new_data =calloc(sizeof(struct node_argument),1);
-    new->data->node_argument = &new_data;
-    new_data.node = new;
-
+    struct node_argument new_data ={
+      new,  
+    };
+    new->data.node_argument = &new_data;
 }
 
 void create_command(ast_node *new)
 {
-    struct node_command new_data = calloc(sizeof(struct node_command),1);
-    new->data->node_command = &new_data;
+    struct node_command new_data = {
+      DEFAULT_COMM,
+      new,
+    };
+    new->data.node_command = &new_data;
     check_command(new);
-    new_data.node = new;
 }
 
 void create_and(ast_node* new)
 {
-    struct node_and new_data = calloc(sizeof(struct node_and),1);
-    new->data->node_and=&new_data;
-    new_data.node = new;
+    struct node_and new_data = {
+      new,  
+    };
+    new->data.node_and=&new_data;
 }
 
 void create_semi_colon(ast_node* new)
 {
-    struct node_semi_colon new_data = calloc(sizeof(struct node_semi_colon),1);
-    new->data->node_semi_colon=&new_data;
-    new_data.node = new;
+    struct node_semi_colon new_data = {
+      new,  
+    };
+    new->data.node_semi_colon=&new_data;
 }
 
 void create_pipe(ast_node* new)
 {
-    struct node_pipe new_data = calloc(sizeof(struct node_pipe),1);
-    new->data->node_pipe=&new_data;
-    new_data.node = new;
+    struct node_pipe new_data = {
+      new,  
+    };
+    new->data.node_pipe=&new_data;
 }
 
 void create_backtick(ast_node* new)
 {
-    struct node_backtick new_data = calloc(sizeof(struct node_backtick),1);
-    new->data->node_backtick=&new_data;
-    new_data.node = new;
+    struct node_backtick new_data = {
+      new,  
+    };
+    new->data.node_backtick=&new_data;
 }
 
 //function to check errors for command
@@ -618,7 +640,7 @@ void check_command(ast_node* new)
     switch(new->string)
     {
         case "cat":
-            new->data->node_command.cmd = CAT;
+            new->data.node_command->cmd = CAT;
             break;
 
             //ajouter ici les prochaines commandes
@@ -632,13 +654,13 @@ void check_command(ast_node* new)
                 {
                     //vérifie si le fichier est bien un exécutable
                     if(access(new->string,X_OK == 0))
-                        new->data->node_command.cmd = DEFAULT;
+                        new->data.node_command->cmd = DEFAULT;
                     else
                         new->type = NODE_UNKNOWN;
-                    free(new->data->node_command);
+                    free(new->data.node_command);
                     struct node_unknown data=
                         calloc(sizeof(struct node_unknown),1);
-                    new->data->node_unknown = &data;
+                    new->data.node_unknown = &data;
                     data.type = EXEC_NOT_FOUND;
                 }
             }
