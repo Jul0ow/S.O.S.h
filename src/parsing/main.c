@@ -7,12 +7,12 @@
 
 int __ast_print(ast_node* ast,int i)
 {
-    printf("|");
+    printf("|\n");
     for(int j=0;j<i;j++)
     {
 	printf("_");
     }
-    printf("%s\n",(char*)ast->string);
+    printf("%s\n",ast->string);
     int err = 0;
     if(ast->child!=NULL)
     {
@@ -49,11 +49,11 @@ int main()
 
     list_push_endT(&l, &c1); //cat
 
-    ast_node *ast = creating_ast(&l);
+    ast_node* node= creating_ast(&l);
 
-    int err = ast_print(ast);
+    int err = ast_print(node);
     
-    free_ast(ast);
+    free_ast(node);
     freeL(&l);
     return err;
 }

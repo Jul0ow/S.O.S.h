@@ -11,7 +11,7 @@ ast_node* creating_ast(listT* list)
     ast_node first = {
         NODE_HEAD,
         .data.node_head = NULL,
-        "",
+        "tree",
         0,
         NULL,
         NULL,
