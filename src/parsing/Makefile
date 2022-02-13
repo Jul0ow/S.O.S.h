@@ -12,10 +12,10 @@ DEP = ${SRC:.c=.d}
 
 all: main
 
-main: main.o ast.o ast_print.o listT.o lexer.o xmalloc.o vectorS.o
-main.o:main.c  ast.h ast_print.h listT.h lexer.h
+main: main.o listT.o lexer.o xmalloc.o vectorS.o ast.o #ast_print.o
+main.o:main.c  ast.h listT.h lexer.h #ast_print.h 
 ast.o:ast.c xmalloc.h lexer.h listT.h
-ast_print.o:ast_print.c ast.h ast_print.h
+#ast_print.o:ast_print.c ast.h ast_print.h
 listT.o: listT.c lexer.h xmalloc.h listT.h
 lexer.o: lexer.c listT.h vectorS.h lexer.h xmalloc.h
 vectorS.o: vectorS.c vectorS.h xmalloc.h

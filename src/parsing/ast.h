@@ -82,7 +82,7 @@ struct ast_node
     } data;
 
     //litteral expression
-    void *string;
+    char *string;
 
     //first child / right sibling implementation
     
