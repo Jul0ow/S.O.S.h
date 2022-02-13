@@ -12,7 +12,7 @@ ast_node* creating_ast(listT* list)
     current->type = NODE_HEAD;
     current->data.node_head = NULL;
     char* str = malloc(sizeof(char)*5);
-    str[0]='t'; 
+    str[0]='t';
     str[1]='r';
     str[2]='e';
     str[3]='e';
@@ -160,6 +160,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_AND_BOOL;
                 create_and_bool(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father = new;
                 new->child = current;
                 new->nb_child ++;
@@ -182,6 +183,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_OR_BOOL;
                 create_or_bool(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father = new;
                 new->child = current;
                 new->nb_child ++;
@@ -204,6 +206,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_AND;
                 create_and(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father=new;
                 new->child = current;
                 new->nb_child++;
@@ -226,6 +229,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_DRIGHT_CHEVRON;
                 create_dright_chevron(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father=new;
                 new->child = current;
                 new->nb_child++;
@@ -248,6 +252,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_DLEFT_CHEVRON;
                 create_dleft_chevron(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father=new;
                 new->child = current;
                 new->nb_child++;
@@ -265,6 +270,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_RIGHT_CHEVRON;
                 create_right_chevron(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father=new;
                 new->child = current;
                 new->nb_child++;
@@ -287,6 +293,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_LEFT_CHEVRON;
                 create_left_chevron(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father=new;
                 new->child = current;
                 new->nb_child++;
@@ -309,6 +316,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_SEMI_COLON;
                 create_semi_colon(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father=new;
                 new->child = current;
                 new->nb_child++;
@@ -358,6 +366,7 @@ ast_node* creating_ast(listT* list)
                 new->type = NODE_PIPE;
                 create_pipe(new);
                 new->father = current->father;
+                new->father->child = new;
                 current->father=new;
                 new->child = current;
                 new->nb_child++;
@@ -642,6 +651,14 @@ void check_command(ast_node* new)
     if (strcmp(new->string, "cat") == 0)
     {
         new->data.node_command->cmd = CAT;
+    }
+    else if (strcmp(new->string, "pwd") == 0)
+    {
+        new->data.node_command->cmd = PWD;
+    }
+    else if (strcmp(new->string, "ls") == 0)
+    {
+        new->data.node_command->cmd = LS;
     }
 
     // autres commandes

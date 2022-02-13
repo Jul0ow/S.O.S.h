@@ -7,6 +7,8 @@
 enum cmd
 {
     CAT,
+    PWD,
+    LS,
     //add here future commands once they're implemented
     DEFAULT
     //...
