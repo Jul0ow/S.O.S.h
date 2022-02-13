@@ -1,17 +1,21 @@
 #ifndef AST_H
 #define AST_H
 
+#include "ast.h"
+#include "listT.h"
 //enum of all commands
 enum cmd
 {
     CAT,
-    //add here future commands once they're implemente
+    PWD,
+    LS,
+    //add here future commands once they're implemented
     DEFAULT
     //...
-}
-
+};
+typedef struct ast_node ast_node;
 //node of the ast
-typedef struct ast_node
+struct ast_node
 {
     //type of node (~= token)
     enum node_type
@@ -51,6 +55,8 @@ typedef struct ast_node
     //struct of each type of node (matches the node_type)
     union
     {
+        //Head
+        struct node_head    *node_head;
         //Commands etc...
         struct node_command *node_command;
         struct node_argument *node_argument;
@@ -65,7 +71,7 @@ typedef struct ast_node
         struct node_left_chevron *node_left_chevron;
 
         //COMMA ??????????
-        struct node_comment *node_command;
+        struct node_comment *node_comment;
         struct node_semi_colon *node_semi_colon;
         struct node_left_paren *node_left_paren;
         struct node_right_paren *node_right_paren;
@@ -78,17 +84,17 @@ typedef struct ast_node
     } data;
 
     //litteral expression
-    void *string;
+    char *string;
 
     //first child / right sibling implementation
     
-    size_t nb_child = 0;
+    int nb_child;
 
-    ast_node *child = NULL;
+    ast_node *child;
 
-    ast_node *sibling = NULL;
+    ast_node *sibling;
 
-    ast_node *father = NULL;
+    ast_node *father;
 };
 
 // === STRUCTS DEF ===
@@ -128,7 +134,7 @@ struct node_dright_chevron
 
 struct node_dleft_chevron
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_right_chevron
@@ -138,39 +144,86 @@ struct node_right_chevron
 
 struct node_left_chevron
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_semi_colon
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_pipe
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_backtick
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_left_paren
 {
     ast_node *node;
-    int closed = 0;
+    int closed;
 };
 
 //unknown
 struct node_unknown
 {
+    ast_node *node;
     //every error we can encounter (will be handled in execution part)
     enum error_type
     {
-        EXEC_NOT_FOUND
+        EXEC_NOT_FOUND,
+        DEFAULT_ERROR
         //add here future error type
     } type;
 };
+
+struct node_head{
+    ast_node* node;
+};
+
+// === Initialisation foncitons ===
+
+ast_node* creating_ast(listT* list);
+
+void free_ast(ast_node* node);
+
+int is_separator(ast_node* current);
+
+int is_chevron(ast_node* current);
+
+void create_or_bool(ast_node* new);
+
+void create_left_paren(ast_node* new);
+
+void create_dleft_chevron(ast_node* new);
+
+void create_dright_chevron(ast_node* new);
+
+void create_left_chevron(ast_node* new);
+
+void create_right_chevron(ast_node* new);
+
+void create_and(ast_node* new);
+
+void create_and_bool(ast_node* new);
+
+void create_argument(ast_node *new);
+
+void create_command(ast_node *new);
+
+void create_and(ast_node* new);
+
+void create_semi_colon(ast_node* new);
+
+void create_pipe(ast_node* new);
+
+void create_backtick(ast_node* new);
+
+void check_command(ast_node* new);
+
 
 #endif

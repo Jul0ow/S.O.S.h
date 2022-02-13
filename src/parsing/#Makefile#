@@ -1,0 +1,32 @@
+# Makefile
+
+CPPFLAGS = -MMD
+CC = gcc
+CFLAGS = -Wall -Wextra -g
+LDFLAGS =
+LDLIBS =
+
+SRC = main.c
+OBJ = ${SRC:.c=.o}
+DEP = ${SRC:.c=.d}
+
+all: main
+
+main: main.o ast.o ast_print.o ../utils/listT.o ../lexing/lexer.o xmalloc.o
+main.o: ast.h ast_print.h ../utils/listT.h ../lexing/lexer.h
+ast.o: xmalloc.h ../lexing/lexer.h ../utils/listT.h
+ast_print.o: ast.h
+../utils/listT.o: ../lexing/lexer.h
+../lexing/lexer.o:
+
+-include ${DEP}
+
+.PHONY: clean
+
+clean:
+	${RM} ${OBJ}
+	${RM} ${DEP}
+	${RM} main
+
+# END
+
