@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "listT.h"
-#include "lexer.h"
+#include "../lexing/lexer.h"
 #include "xmalloc.h"
 
 

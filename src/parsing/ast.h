@@ -173,4 +173,46 @@ struct node_unknown
     } type;
 };
 
+
+// === Initialisation foncitons ===
+
+ast_node* creating_ast(list* list);
+
+void free_ast(ast_node node);
+
+int is_separator(ast_node* current);
+
+int is_chevron(ast_node* current);
+
+void create_or_bool(ast_node* new);
+
+void create_left_paren(ast_node* new);
+
+void create_dleft_chevron(ast_node* new);
+
+void create_dright_chevron(ast_node* new);
+
+void create_left_chevron(ast_node* new);
+
+void create_right_chevron(ast_node* new);
+
+void create_and(ast_node* new);
+
+void create_and_bool(ast_node* new);
+
+void create_argument(ast_node *new);
+
+void create_command(ast_node *new);
+
+void create_and(ast_node* new);
+
+void create_semi_colon(ast_node* new);
+
+void create_pipe(ast_node* new);
+
+void create_backtick(ast_node* new);
+
+void check_command(ast_node* new);
+
+
 #endif
