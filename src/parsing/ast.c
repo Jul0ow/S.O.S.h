@@ -10,7 +10,7 @@ ast_node* creating_ast(listT* list)
 {
     ast_node first = {
         NODE_HEAD,
-        data.node_head = NULL,
+        .data.node_head = NULL,
         "",
         0,
         NULL,
@@ -23,7 +23,7 @@ ast_node* creating_ast(listT* list)
     size_t nb_parenthesis = 0;
     while(p!=NULL)
     {
-        token t = p->token;
+        token t = *(p->token);
         if (t.type == COMMENT)
         {
             p = p->next;
@@ -62,7 +62,7 @@ ast_node* creating_ast(listT* list)
         }
         ast_node new = {
         NODE_HEAD,
-        data.node_head = NULL,
+        .data.node_head = NULL,
         t.string,
         0,
         NULL,
@@ -592,7 +592,7 @@ void create_argument(ast_node *new)
 void create_command(ast_node *new)
 {
     struct node_command new_data = {
-      DEFAULT_COMM,
+      DEFAULT,
       new,
     };
     new->data.node_command = &new_data;
@@ -637,6 +637,42 @@ void check_command(ast_node* new)
     /*
        vérifie si la commande entrée est valide
        */
+    new->data.node_command->cmd = DEFAULT;
+    if (strcmp(new->string, "cat") == 0)
+    {
+        new->data.node_command->cmd = CAT;
+    }
+
+    // autres commandes
+
+    //default
+
+    /*
+    else
+    {
+        if(strlen(new->string)>2)
+        {
+            if((char*)new->string[0]=='/'||
+               ((char*)new->string[1])=='/'&&
+               ((char*)new->string[0]=='.'))
+            {
+                //vérifie si le fichier est bien un exécutable
+                if(access(new->string,X_OK == 0))
+                    new->data.node_command->cmd = DEFAULT;
+                else
+                    new->type = NODE_UNKNOWN;
+                free(new->data.node_command);
+                struct node_unknown data = {
+                    new,
+                    EXEC_NOT_FOUND,
+                };
+                new->data.node_unknown = &data;
+            }
+        }
+    }
+    */
+
+    /*
     switch(new->string)
     {
         case "cat":
@@ -649,8 +685,8 @@ void check_command(ast_node* new)
             if(strlen(new->string)>2)
             {
                 if((char*)new->string[0]=='/'||
-                        ((char*)new->string[1]=='/'&&
-                         (char*)new->string[0]=='.'))
+                   ((char*)new->string[1])=='/'&&
+                    ((char*)new->string[0]=='.'))
                 {
                     //vérifie si le fichier est bien un exécutable
                     if(access(new->string,X_OK == 0))
@@ -658,13 +694,15 @@ void check_command(ast_node* new)
                     else
                         new->type = NODE_UNKNOWN;
                     free(new->data.node_command);
-                    struct node_unknown data=
-                        calloc(sizeof(struct node_unknown),1);
+                    struct node_unknown data = {
+                        new,
+                        EXEC_NOT_FOUND,
+                    };
                     new->data.node_unknown = &data;
-                    data.type = EXEC_NOT_FOUND;
                 }
             }
             break;
     }
+    */
 }
 

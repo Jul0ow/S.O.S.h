@@ -7,7 +7,7 @@
 enum cmd
 {
     CAT,
-    //add here future commands once they're implemente
+    //add here future commands once they're implemented
     DEFAULT
     //...
 };
@@ -169,6 +169,7 @@ struct node_left_paren
 //unknown
 struct node_unknown
 {
+    ast_node *node;
     //every error we can encounter (will be handled in execution part)
     enum error_type
     {

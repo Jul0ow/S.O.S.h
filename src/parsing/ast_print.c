@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "ast.h"
+#include "ast_print.h"
 
 int printast(ast_node* ast)
 {
@@ -8,14 +9,14 @@ int printast(ast_node* ast)
     return err;
 }
 
-int __printast(*ast_node ast,size_t i)
+int __printast(ast_node* ast,size_t i)
 {
     printf("|");
     for(size_t j=0;j<i;j++)
     {
 	printf("_");
     }
-    printf("%s\n",ast->expression);
+    printf("%s\n",ast->string);
     int err = 0;
     if(ast->child!=NULL)
     {
