@@ -1,8 +1,8 @@
 #include "ast.h"
-#include "../lexing/lexer.h"
-#include "../utils/list.h"
+#include "lexer.h"
+#include "listT.h"
 #include "xmalloc.h"
-#include "print_ast.h"
+#include "ast_print.h"
 
 int main()
 {
@@ -20,7 +20,7 @@ int main()
 
     ast_node *ast = creating_ast(&l);
 
-    int err = printast(&ast);
+    int err = print_ast(&ast);
 
     freeL(&l);
 }

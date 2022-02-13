@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include "ast.h"
+#include "listT.h"
 //enum of all commands
 enum cmd
 {
@@ -8,10 +10,10 @@ enum cmd
     //add here future commands once they're implemente
     DEFAULT
     //...
-}
-
+};
+typedef struct ast_node ast_node;
 //node of the ast
-typedef struct ast_node
+struct ast_node
 {
     //type of node (~= token)
     enum node_type
@@ -65,7 +67,7 @@ typedef struct ast_node
         struct node_left_chevron *node_left_chevron;
 
         //COMMA ??????????
-        struct node_comment *node_command;
+        struct node_comment *node_comment;
         struct node_semi_colon *node_semi_colon;
         struct node_left_paren *node_left_paren;
         struct node_right_paren *node_right_paren;
@@ -82,13 +84,13 @@ typedef struct ast_node
 
     //first child / right sibling implementation
     
-    size_t nb_child = 0;
+    int nb_child;
 
-    ast_node *child = NULL;
+    ast_node *child;
 
-    ast_node *sibling = NULL;
+    ast_node *sibling;
 
-    ast_node *father = NULL;
+    ast_node *father;
 };
 
 // === STRUCTS DEF ===
@@ -128,7 +130,7 @@ struct node_dright_chevron
 
 struct node_dleft_chevron
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_right_chevron
@@ -138,28 +140,28 @@ struct node_right_chevron
 
 struct node_left_chevron
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_semi_colon
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_pipe
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_backtick
 {
-    ast_node *node
+    ast_node *node;
 };
 
 struct node_left_paren
 {
     ast_node *node;
-    int closed = 0;
+    int closed;
 };
 
 //unknown
@@ -168,7 +170,8 @@ struct node_unknown
     //every error we can encounter (will be handled in execution part)
     enum error_type
     {
-        EXEC_NOT_FOUND
+        EXEC_NOT_FOUND,
+        DEFAULT_ERROR
         //add here future error type
     } type;
 };
@@ -176,7 +179,7 @@ struct node_unknown
 
 // === Initialisation foncitons ===
 
-ast_node* creating_ast(list* list);
+ast_node* creating_ast(listT* list);
 
 void free_ast(ast_node node);
 
