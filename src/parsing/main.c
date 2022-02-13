@@ -20,7 +20,7 @@ int main()
 
     ast_node *ast = creating_ast(&l);
 
-    int err = print_ast(&ast);
+    int err = ast_print(&ast);
 
     freeL(&l);
 }
