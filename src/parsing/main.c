@@ -21,6 +21,8 @@ int main()
     ast_node *ast = creating_ast(&l);
 
     int err = ast_print(&ast);
-
+    
+    free_ast(ast);
     freeL(&l);
+    return err;
 }

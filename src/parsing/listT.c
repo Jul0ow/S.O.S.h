@@ -19,7 +19,7 @@ void freeL(listT *l)
     }
     free(l);
 }
-void list_init(listT *list)
+void list_initT(listT *list)
 {
     list->head = NULL;
     list->tail = NULL;
