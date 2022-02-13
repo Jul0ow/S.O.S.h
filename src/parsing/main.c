@@ -211,7 +211,7 @@ int main()
     c16->string = str16;
     c16->len = 2;
 
-    /*
+    
     list_push_endT(l, c1); //cat
     list_push_endT(l, c2); //-japon
     list_push_endT(l, c3); //main.c
@@ -222,7 +222,7 @@ int main()
     list_push_endT(l, c8); //|
     list_push_endT(l, c9); //echo
     list_push_endT(l, c10);//&
-    */
+    
     list_push_endT(l, c11);//(
     list_push_endT(l, c15); //echo
     list_push_endT(l, c13);//`
