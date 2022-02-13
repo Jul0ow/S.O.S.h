@@ -46,6 +46,7 @@ ast_node* creating_ast(listT* list)
                 //erreur de grammaire
             }
             p = p->next;
+            continue;
         }
         else if(t.type == RIGHT_PAREN)
         {
@@ -63,6 +64,7 @@ ast_node* creating_ast(listT* list)
             }
             current->data.node_left_paren->closed =1;
             p=p->next;
+            continue;
         }
         ast_node* new = calloc(sizeof(ast_node),1);
         new->type = NODE_HEAD;
@@ -81,7 +83,7 @@ ast_node* creating_ast(listT* list)
                       (current->type!=NODE_BACKTICK ||
                        is_backtick == 0)&&(current->type!=NODE_LEFT_PAREN ||
                            (current->type==NODE_LEFT_PAREN &&
-                           current->data.node_left_paren->closed == 0)))
+                           current->data.node_left_paren->closed == 1)))
                 {
                     current = current->father;
                 }

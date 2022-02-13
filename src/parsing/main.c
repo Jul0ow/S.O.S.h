@@ -147,7 +147,7 @@ int main()
     //& (AND)
     token* c10 = malloc(sizeof(token));
     char* str10 = malloc(sizeof(char)*2);
-    str10[0]='|';
+    str10[0]='&';
     str10[1]='\0';
     c10->type=AND;
     c10->string = str10;
@@ -180,7 +180,38 @@ int main()
     c13->string = str13;
     c13->len = 1;
 
+    //` (BACKTICK)
+    token* c14 = malloc(sizeof(token));
+    char* str14 = malloc(sizeof(char)*2);
+    str14[0]='`';
+    str14[1]='\0';
+    c14->type=BACKTICK;
+    c14->string = str14;
+    c14->len = 1;
 
+    //echo (COMMAND)
+    token* c15 = malloc(sizeof(token));
+    char* str15 = malloc(sizeof(char)*5);
+    str15[0]='e';
+    str15[1]='c';
+    str15[2]='h';
+    str15[3]='o';
+    str15[4]='\0';
+    c15->type=COMMAND;
+    c15->string = str15;
+    c15->len = 4;
+
+    //ls (COMMAND)
+    token* c16 = malloc(sizeof(token));
+    char* str16 = malloc(sizeof(char)*3);
+    str16[0]='l';
+    str16[1]='s';
+    str16[2]='\0';
+    c16->type=COMMAND;
+    c16->string = str16;
+    c16->len = 2;
+
+    /*
     list_push_endT(l, c1); //cat
     list_push_endT(l, c2); //-japon
     list_push_endT(l, c3); //main.c
@@ -191,17 +222,18 @@ int main()
     list_push_endT(l, c8); //|
     list_push_endT(l, c9); //echo
     list_push_endT(l, c10);//&
+    */
     list_push_endT(l, c11);//(
-    list_push_endT(l, c9); //echo
+    list_push_endT(l, c15); //echo
     list_push_endT(l, c13);//`
-    list_push_endT(l, c5); //ls
-    list_push_endT(l, c13);//`
+    list_push_endT(l, c16); //ls
+    list_push_endT(l, c14);//`
     list_push_endT(l, c12);//)
 
 
     ast_node* node= creating_ast(l);
     int err = ast_print(node);
-    
+
     free_ast(node);
     freeL(l);
     return err;
