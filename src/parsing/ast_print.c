@@ -1,31 +1,34 @@
 #include <stdio.h>
 #include "ast.h"
+#include "ast_print.h"
 
-int printast(ast_node* ast)
-{
-    size_t i = 0;
-    int err = __printast(ast,i);
-    return err;
-}
-
-int __printast(*ast_node ast,size_t i)
+int __ast_print(ast_node* ast,int i)
 {
     printf("|");
-    for(size_t j=0;j<i;j++)
+    for(int j=0;j<i;j++)
     {
 	printf("_");
     }
-    printf("%s\n",ast->expression);
+    printf("%s\n",(char*)ast->string);
     int err = 0;
     if(ast->child!=NULL)
     {
-	err = __printast(ast->child,i+1);
+	err = __ast_print(ast->child,i+1);
     }
     if(err != 0)
 	return err;
     if(ast->sibling != NULL)
     {
-	err = __printast(ast->sibling,i);
+	err = __ast_print(ast->sibling,i);
     }
     return err;
 }
+
+int ast_print(ast_node* ast)
+{
+    int i = 0;
+    int err = __ast_print(ast,i);
+    return err;
+}
+
+

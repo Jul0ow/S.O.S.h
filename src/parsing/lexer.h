@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 #include "vectorS.h"
-#include "list.h"
+#include "listT.h"
 #define TRUE 1
 #define FALSE 0
 
@@ -48,9 +48,9 @@ void lexing(char *entry, listT* token, char end);
 int isSeparator(char c);
 
 //Function which create the next token
-size_t read_word(char *p, int *isCommand, listT *token_list);
+size_t read_word(char *p, int isCommand, listT *token_list);
 
-int read_separator(char *p, listT *token_list, int *isCommand);
+int read_separator(char *p, listT *token_list);
 
 //Return TRUE if the char is a Separator
 int isSeparator(char c);

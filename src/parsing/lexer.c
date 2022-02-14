@@ -29,7 +29,7 @@ int isSeparator(char c)
 listT* init_lexing(char *entry)
 {
     listT *token_list = xmalloc(sizeof(listT));
-    list_init(token_list);
+    list_initT(token_list);
 
     lexing(entry, token_list, '\0');
 
@@ -38,11 +38,11 @@ listT* init_lexing(char *entry)
 
 //First function to be called, only once and always the function
 //can be called in ` quote
-size_t read_word(char *p, int *isCommand, listT *token_list) 
+size_t read_word(char *p, int isCommand, listT *token_list) 
 {
     if (isSeparator(*p))
     {
-        int res = read_separator(p, token_list, isCommand);
+        int res = read_separator(p, token_list);
         if (res)
             return token_list->tail->token->len;
         else //only space
@@ -56,7 +56,7 @@ size_t read_word(char *p, int *isCommand, listT *token_list)
         //initializing the token that will be returned
         token *new = xmalloc(sizeof(token));
 
-        if(*isCommand)
+        if(isCommand)
             new->type = COMMAND;
         else
             new->type = ARGUMENT;
@@ -76,22 +76,17 @@ size_t read_word(char *p, int *isCommand, listT *token_list)
 
         list_push_endT(token_list, new);
         
-        *isCommand = FALSE;
-        
         return new->len;
     }
 }
 
-int read_separator(char *p, listT *token_list, int *isCommand)
+int read_separator(char *p, listT *token_list)
 {
     token *t = xmalloc(sizeof(token));
     t->len = (size_t)1;
-    if (*p != ' ')
-        *isCommand = FALSE;
     switch (*p)
     {
         case '&':
-            *isCommand = TRUE;
             if (*(p+1) == '&')
             {
                 t->len = 2;
@@ -102,7 +97,6 @@ int read_separator(char *p, listT *token_list, int *isCommand)
             break;
 
         case '|':
-            *isCommand = TRUE;
             if (*(p+1) == '|')
             {
                 t->len = 2;
@@ -144,7 +138,6 @@ int read_separator(char *p, listT *token_list, int *isCommand)
             break;
 
         case ';':
-            *isCommand = TRUE;
             t->type = SEMI_COLON;
             break;
 
@@ -180,9 +173,7 @@ void lexing(char *entry, listT* token_list, char end)
 {
 
     char *p = entry;
-   
-    int isCommand = TRUE;
-
+    
     //if we are not bewteen simple or double quotes we do not use space
     if (end != '\'' && end != '"') 
         while (*p != end && *p == ' ')
@@ -191,12 +182,12 @@ void lexing(char *entry, listT* token_list, char end)
     if(*p == end)
         return;
 
-    read_word(p, &isCommand, token_list);
+    read_word(p, TRUE, token_list);
     p += token_list->tail->token->len;
 
 
     while (*p != end)
     {
-        p += read_word(p, &isCommand, token_list);
+        p += read_word(p, FALSE, token_list);
     }
 }

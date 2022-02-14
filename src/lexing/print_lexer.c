@@ -94,19 +94,20 @@ void print_list(listT *l)
     printf("head");
     while (elm != NULL)
     {
-        printf(" -> ");
         print_token(elm->token);
         elm = elm->next;
     }
 
     printf(" -> tail\n");
+
+    printf("----------------------------------------------------------\n");
 }
 
 int main(int argc, char **argv)
 {
     if (argc == 1)
     {
-        printf("Error : nothing to lex");
+        printf("Error : nothing to lex\n");
         return 1;
     }
 
