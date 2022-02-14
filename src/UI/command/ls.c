@@ -6,13 +6,14 @@
 
 #define SIZE 264
 
-int main()
+int main(int argc, char** argv)
 {
+    if (argc)
     struct dirent *dir;
 
     char *s = malloc(SIZE * sizeof(char));
     while (getcwd(s, SIZE) == NULL)
-        if (realloc(s, SIZE + SIZE) == NULL) errx(1, "realloc");
+        if ((s realloc(s, SIZE + SIZE)) == NULL) errx(1, "realloc");
     
     DIR *d = opendir(s); 
     if (d)

@@ -1,5 +1,17 @@
 #include "user_interface.h"
 
+//==================================================================
+// Utils
+
+void file_type(char *filename)
+{
+    struct stat buf;
+    if (stat(filename, &buf) == -1)
+        errx(1, "Problem");
+    if (!S_ISDIR(buf.st_mode))
+        errx(1, "cd: %s: Not a directory\n", filename);
+}
+
 //===================================================================
 // Functions for history
 
@@ -94,6 +106,7 @@ void update_string(UI* ui)
 {
     if (ui->hist->index >= 0 && ui->hist->index < ui->hist->size)
     {
+	printf("ok\n");
         History* hist = ui->hist;
         char* str = get_data(hist);
         gtk_text_buffer_set_text(ui->buffer, str, strlen(str));
@@ -253,6 +266,10 @@ void execute_command(UI *ui, char* text)
 	{
 	    exit(EXIT_SUCCESS);
 	}
+	else if (strcmp(args->args[0], "firefox") == 0)
+	{
+            execl("/usr/bin/firefox", "firefox", args->args[1], NULL);
+	}
 	else if (execv(args->command, args->args) == -1)
 	    printf("%s: An error occurs\n", args->args[0]);
 
@@ -334,7 +351,7 @@ void evaluate_string(UI *ui)
     {
         execute_command(ui, text);
 	append_hist(ui->hist, text);
-	print_hist(ui->hist);
+	//print_hist(ui->hist);
     }
     else
     {
@@ -369,9 +386,12 @@ void new_graph_space(UI *ui)
     char *s = malloc(3 * sizeof(char));
     strcpy(s, "./");
     LW_append(ui->Gs->lw, s);
+    //printf("append -> OK\n");
     vector_push(ui->Gs->v, ui->Gs->G->last_pos);
     free_Pgraph(ui->Gs->G);
+    //printf("free -> OK\n");
     ui->Gs->G = create_Pgraph_with_dir("./");
+    //printf("create -> OK\n");
 }
 
 void new_graph_dir(UI *ui)
@@ -393,6 +413,7 @@ void update_auto_completion(UI *ui)
 
     if (ui->Gs->G->word->w[ui->Gs->G->word->index - 1] == ' ')
     {
+	//printf("detected -> OK\n");
 	new_graph_space(ui);
     }
     else if (ui->Gs->G->word->w[ui->Gs->G->word->index - 1] == '/')

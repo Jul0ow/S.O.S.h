@@ -366,7 +366,11 @@ Pgraph *create_Pgraph_with_dir(char *cur_dir)
 	{
 	    len = strlen(dir->d_name) + 2;
             char *path = malloc((dir_len + len - 1) * sizeof(char));
+	    if (path == NULL)
+		errx(1, "fail malloc");
 	    char *s = malloc(len * sizeof(char));
+	    if (s == NULL)
+                errx(1, "fail malloc 2");
 	    strcpy(path, cur_dir);
 	    strcat(path, dir->d_name);
 	    strcpy(s, dir->d_name);
