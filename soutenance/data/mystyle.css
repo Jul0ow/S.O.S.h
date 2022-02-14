@@ -1,0 +1,13 @@
+#myGrid {
+    background-color: #000033;
+}
+
+#Text_view text {
+    color: white;
+    background-color: #000033;
+}
+
+#completion {
+    color: white;
+    opacity: 0.5;
+}
