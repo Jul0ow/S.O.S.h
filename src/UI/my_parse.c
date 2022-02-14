@@ -69,7 +69,8 @@ int valid_command(char *cmd)
 	|| strcmp(cmd, "ls") == 0
 	|| strcmp(cmd, "pwd") == 0
 	|| strcmp(cmd, "cd") == 0
-	|| strcmp(cmd, "firefox") == 0)
+	|| strcmp(cmd, "firefox") == 0
+        || strcmp(cmd, "lexeur") == 0)
     {
 	return 1;
     }

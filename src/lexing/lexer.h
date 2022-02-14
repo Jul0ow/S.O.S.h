@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 #include "vectorS.h"
-#include "list.h"
+#include "listT.h"
 #define TRUE 1
 #define FALSE 0
 

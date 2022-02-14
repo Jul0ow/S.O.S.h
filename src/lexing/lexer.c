@@ -29,7 +29,7 @@ int isSeparator(char c)
 listT* init_lexing(char *entry)
 {
     listT *token_list = xmalloc(sizeof(listT));
-    list_init(token_list);
+    list_initT(token_list);
 
     lexing(entry, token_list, '\0');
 

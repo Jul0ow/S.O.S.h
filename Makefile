@@ -8,13 +8,13 @@ SRC= $(filter-out $(wildcard src/testSuite/*.c), $(ALL))
 TMP= $(filter-out $(wildcard src/parsing/*.c), $(SRC))
 PRINT_SRC= $(filter-out $(wildcard src/UI/*.c), $(TMP))
 
+
 OBJ= $(patsubst %.c,%.o,$(SRC))
 TEST_OBJ= $(patsubst %.c,%.o,$(TEST_SRC))
 PRINT_OBJ = $(patsubst %.c,%.o,$(PRINT_SRC))
 
 HEA= $(addprefix -I, $(dir $(wildcard src/*/)))
 HEAP= $(filter-out $(wildcard src/UI/*.c), $(HEA))
-
 
 
 all: main print test
@@ -32,7 +32,7 @@ test: $(TEST_OBJ)
  
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(HEA) -c $< -o $@
+	$(CC) $(CFLAGS) $(HEAP) -c $< -o $@
 
 
 clean:

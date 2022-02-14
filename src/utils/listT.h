@@ -14,7 +14,7 @@ struct list_elm
   struct token *token;
 };
 
-void freeL(listT *l);
+void freeL(struct listT *l);
 
 // Initialize the sentinel of an empty list.
 void list_initT(struct listT *list);

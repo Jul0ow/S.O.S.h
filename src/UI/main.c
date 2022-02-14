@@ -238,12 +238,15 @@ int my_parse(UI* ui, char* buf, Args* args)
     strcpy(s, "command/");
     strcat(s, args->args[0]);
     args->command = s;
+
+    //printf("%s\n", args->args[0]);
     
     return 0;
 }
 
 void execute_command(UI *ui, char* text)
 {
+    //printf("%s\n", text);
     Args* args = init_args(text);
     int p[2];
     if (pipe(p) == -1)
@@ -270,6 +273,22 @@ void execute_command(UI *ui, char* text)
 	{
             execl("/usr/bin/firefox", "firefox", args->args[1], NULL);
 	}
+        else if (strcmp(args->args[0], "lexeur") == 0)
+        {
+            /*printf("ok\n");
+            printf("%ld\n", args->len);
+            int len = 0;
+            for (size_t i = 1; i < args->len; i++)
+                len += strlen(args->args[i]);
+            printf("%d\n", len);
+            char* s = malloc((len + 1) * sizeof(char));
+            for (size_t i = 1; i < args->len; i++)
+                strcat(s, args->args[i]);
+            printf("OK\n");
+            printf("%s\n", s);*/
+            execl("../../soutenance/lexing", "lexing", args->args, NULL);
+            //execl("command/ls", "ls", NULL);
+        }
 	else if (execv(args->command, args->args) == -1)
 	    printf("%s: An error occurs\n", args->args[0]);
 
