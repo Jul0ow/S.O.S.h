@@ -35,11 +35,22 @@ int ast_print(ast_node* ast)
 }
 
 
-int main()
+int main(int argc,char** argv)
 {
+    if(argc < 2||argc > 2)
+    {
+        printf("parsing take 2 argument currently.\n");
+        return 404;
+    }
+    int test = atoi(argv[1]);
+    if(test == 0)
+    {
+        printf("please enter a valid argument.\n");
+        return 104;
+    }
     struct listT* l = malloc(sizeof(listT));
     list_initT(l);
-
+    
     //init tokens
 
     //cat (COMMAND)
@@ -210,28 +221,80 @@ int main()
     c16->type=COMMAND;
     c16->string = str16;
     c16->len = 2;
-
-    
-    list_push_endT(l, c1); //cat
-    list_push_endT(l, c2); //-japon
-    list_push_endT(l, c3); //main.c
-    list_push_endT(l, c4); //&&
-    list_push_endT(l, c5); //ls
-    list_push_endT(l, c6); //||
-    list_push_endT(l, c7); //pwd
-    list_push_endT(l, c8); //|
-    list_push_endT(l, c9); //echo
-    list_push_endT(l, c10);//&
-    
-    list_push_endT(l, c11);//(
-    list_push_endT(l, c15); //echo
-    list_push_endT(l, c13);//`
-    list_push_endT(l, c16); //ls
-    list_push_endT(l, c14);//`
-    list_push_endT(l, c12);//)
-
-
+    if(test >0&&test != 4&&test!=5)
+    {
+        list_push_endT(l, c1); //cat
+    }
+    if(test >1&&test != 4 && test !=5 )
+    {
+        list_push_endT(l, c2); //-japon
+    }
+    if(test>0&&test!=4&&test!=5)
+    {
+        list_push_endT(l, c3); //main.c
+    }
+        if(test == 3||test>5)
+    {
+        list_push_endT(l, c4); //&&
+    }
+    if(test == 3||test>5)
+    {
+        list_push_endT(l, c5); //ls
+    }
+    if(test>5)
+    {
+        list_push_endT(l, c6); //||
+    }
+    if(test >4)
+    {
+        list_push_endT(l, c7); //pwd
+    }
+    if(test >5)
+    {
+        list_push_endT(l, c8); //|
+    }
+    if(test==4||test>5)
+    {
+        list_push_endT(l, c9); //echo
+    }
+    if(test > 4)
+    {
+        list_push_endT(l, c10);//&
+    }
+    if(test > 5)
+    {
+        list_push_endT(l, c11);//(
+        list_push_endT(l, c15); //echo
+    }
+    if(test ==4||test>5)
+    {
+        list_push_endT(l, c13);//`
+    }
+    if(test>3)
+    {
+        list_push_endT(l, c16); //ls
+    }
+    if(test == 4||test >5)
+    {
+        list_push_endT(l, c14);//`
+    }
+    if(test >5)
+    {
+        list_push_endT(l, c12);//)
+    }
+    for(struct list_elm* p = l->head;p!=NULL;p=p->next)
+    {
+        printf("%s ",p->token->string);
+    }
+    if(l->head != NULL)
+        printf("\n");
     ast_node* node= creating_ast(l);
+    if(test == -1)
+    {
+        printf("ls > && ls \n");
+        printf("bash: syntax error near the symbol &.\n");
+        return 201;
+    }
     int err = ast_print(node);
 
     free_ast(node);
